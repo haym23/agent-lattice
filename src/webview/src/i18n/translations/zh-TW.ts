@@ -235,8 +235,6 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'terms.agree': '我同意以上內容',
   'terms.agreeButton': '同意並開始',
   'terms.cancelButton': '取消',
-  'terms.warning.aiGeneration': '⚠️ 禁止濫用此功能',
-  'terms.warning.workflow': '⚠️ 此工作流僅應用於合法目的',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': '刪除節點',
@@ -259,10 +257,15 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.skillPath': '路徑',
   'skill.browser.validationStatus': '狀態',
 
+  // Skill Browser Actions
+  'skill.action.refresh': '重新整理',
+  'skill.refreshing': '重新整理中...',
+
   // Skill Browser Errors
   'skill.error.loadFailed': '載入Skill失敗。請檢查Skill目錄。',
   'skill.error.noSelection': '請選擇一個Skill',
   'skill.error.unknown': '發生意外錯誤',
+  'skill.error.refreshFailed': '重新整理Skill失敗',
 
   // Skill Creation Dialog
   'skill.creation.title': '建立新技能',

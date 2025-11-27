@@ -245,8 +245,6 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'terms.agree': '위 내용에 동의합니다',
   'terms.agreeButton': '동의하고 시작',
   'terms.cancelButton': '취소',
-  'terms.warning.aiGeneration': '⚠️ 이 기능의 악용은 금지됩니다',
-  'terms.warning.workflow': '⚠️ 이 워크플로우는 정당한 목적으로만 사용해야 합니다',
 
   // Delete Confirmation Dialog
   'dialog.deleteNode.title': '노드 삭제',
@@ -269,10 +267,15 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
   'skill.browser.skillPath': '경로',
   'skill.browser.validationStatus': '상태',
 
+  // Skill Browser Actions
+  'skill.action.refresh': '새로고침',
+  'skill.refreshing': '새로고침 중...',
+
   // Skill Browser Errors
   'skill.error.loadFailed': 'Skill을 로드하지 못했습니다. Skill 디렉터리를 확인하세요.',
   'skill.error.noSelection': 'Skill을 선택하세요',
   'skill.error.unknown': '예기치 않은 오류가 발생했습니다',
+  'skill.error.refreshFailed': 'Skill 새로고침에 실패했습니다',
 
   // Skill Creation Dialog
   'skill.creation.title': '새 스킬 만들기',
