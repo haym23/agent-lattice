@@ -1,3 +1,9 @@
+## [3.2.4](https://github.com/breaking-brake/cc-wf-studio/compare/v3.2.3...v3.2.4) (2025-12-06)
+
+### Bug Fixes
+
+* add responsive design to NodePalette ([#223](https://github.com/breaking-brake/cc-wf-studio/issues/223)) ([39432af](https://github.com/breaking-brake/cc-wf-studio/commit/39432afc60100a4c8a68bd66d72f315fc1d66d0a))
+
 ## [3.2.3](https://github.com/breaking-brake/cc-wf-studio/compare/v3.2.2...v3.2.3) (2025-12-05)
 
 ### Bug Fixes
