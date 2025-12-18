@@ -1,3 +1,9 @@
+## [3.8.2](https://github.com/breaking-brake/cc-wf-studio/compare/v3.8.1...v3.8.2) (2025-12-18)
+
+### Improvements
+
+* AI refinement UX enhancements ([#292](https://github.com/breaking-brake/cc-wf-studio/issues/292)) ([c40c855](https://github.com/breaking-brake/cc-wf-studio/commit/c40c85576250223bf116256793ce4522e560729c))
+
 ## [3.8.1](https://github.com/breaking-brake/cc-wf-studio/compare/v3.8.0...v3.8.1) (2025-12-17)
 
 ### Bug Fixes
