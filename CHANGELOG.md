@@ -1,3 +1,15 @@
+## [3.10.0](https://github.com/breaking-brake/cc-wf-studio/compare/v3.9.1...v3.10.0) (2025-12-29)
+
+### Features
+
+* add Focus Mode for compact UI display ([#328](https://github.com/breaking-brake/cc-wf-studio/issues/328)) ([16d03ca](https://github.com/breaking-brake/cc-wf-studio/commit/16d03cac7e6da2c98baa8c2c4ed5ea8f18b8fa0e))
+
+### Documentation
+
+* add Star History chart and badges to README ([#327](https://github.com/breaking-brake/cc-wf-studio/issues/327)) ([e8c45bb](https://github.com/breaking-brake/cc-wf-studio/commit/e8c45bb0f0795cafbd788811981c80f8bb9bf4b5))
+* update hero image with new workflow screenshot ([#325](https://github.com/breaking-brake/cc-wf-studio/issues/325)) ([81255b8](https://github.com/breaking-brake/cc-wf-studio/commit/81255b830aeaaea52ae64c611f43c3bec92f20e6))
+* update README demo GIFs with Edit with AI and Run Workflow demos ([#326](https://github.com/breaking-brake/cc-wf-studio/issues/326)) ([128e0be](https://github.com/breaking-brake/cc-wf-studio/commit/128e0beb4ac2adaae7b34bf620fa98c15512fabf))
+
 ## [3.9.1](https://github.com/breaking-brake/cc-wf-studio/compare/v3.9.0...v3.9.1) (2025-12-23)
 
 ### Bug Fixes
