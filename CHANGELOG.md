@@ -1,3 +1,9 @@
+## [3.15.0](https://github.com/breaking-brake/cc-wf-studio/compare/v3.14.6...v3.15.0) (2026-01-14)
+
+### Features
+
+* add GitHub Copilot export integration (Beta) ([#454](https://github.com/breaking-brake/cc-wf-studio/issues/454)) ([5d71afe](https://github.com/breaking-brake/cc-wf-studio/commit/5d71afe14278b08f4d0b3e87c5a7f9e925071fc7))
+
 ## [3.14.6](https://github.com/breaking-brake/cc-wf-studio/compare/v3.14.5...v3.14.6) (2026-01-13)
 
 ### Bug Fixes
