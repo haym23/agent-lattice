@@ -486,6 +486,8 @@ export const zhTWWebviewTranslations: WebviewTranslationKeys = {
   'refinement.error.commandNotFound': '未找到Claude Code CLI。請安裝Claude Code以使用AI優化功能。',
   'refinement.error.modelNotSupported':
     '所選模型不受支援或存取未啟用。您可以在Copilot Chat中選擇並使用該模型一次來啟用存取權限。',
+  'refinement.error.copilotNotAvailable':
+    'Copilot 無法使用。請確保已安裝 VS Code 1.89 或更高版本以及 GitHub Copilot 擴充功能。',
   'refinement.error.timeout': 'AI優化逾時。請調整逾時設定值後重試。建議您也可以考慮簡化請求內容。',
   'refinement.error.parseError': '無法解析AI回應。請重試或重新表述您的請求。',
   'refinement.error.validationError': '優化後的工作流程驗證失敗。請嘗試不同的請求。',

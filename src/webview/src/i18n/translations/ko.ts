@@ -504,6 +504,8 @@ export const koWebviewTranslations: WebviewTranslationKeys = {
     'Claude Code CLI를 찾을 수 없습니다. AI 개선 기능을 사용하려면 Claude Code를 설치하세요.',
   'refinement.error.modelNotSupported':
     '선택한 모델이 지원되지 않거나 액세스가 활성화되어 있지 않습니다. Copilot Chat에서 해당 모델을 선택하고 한 번 사용하면 액세스 권한을 활성화할 수 있습니다.',
+  'refinement.error.copilotNotAvailable':
+    'Copilot을 사용할 수 없습니다. VS Code 1.89 이상과 GitHub Copilot 확장 프로그램이 설치되어 있는지 확인하세요.',
   'refinement.error.timeout':
     'AI 개선 시간이 초과되었습니다. 타임아웃 설정값을 조정하고 다시 시도해 보세요. 요청 내용을 단순화하는 것도 권장됩니다.',
   'refinement.error.parseError':

@@ -66,7 +66,13 @@ export interface ClaudeCodeExecutionResult {
   success: boolean;
   output?: string;
   error?: {
-    code: 'COMMAND_NOT_FOUND' | 'MODEL_NOT_SUPPORTED' | 'TIMEOUT' | 'PARSE_ERROR' | 'UNKNOWN_ERROR';
+    code:
+      | 'COMMAND_NOT_FOUND'
+      | 'MODEL_NOT_SUPPORTED'
+      | 'COPILOT_NOT_AVAILABLE'
+      | 'TIMEOUT'
+      | 'PARSE_ERROR'
+      | 'UNKNOWN_ERROR';
     message: string;
     details?: string;
   };
@@ -228,6 +234,23 @@ export async function executeClaudeCodeCLI(
             code: 'COMMAND_NOT_FOUND',
             message: 'Cannot connect to Claude Code - please ensure it is installed and running',
             details: error.message,
+          },
+          executionTimeMs,
+        };
+      }
+
+      // npx fallback failed - Claude package not found
+      if (error.stderr?.includes('could not determine executable to run')) {
+        log('WARN', 'Claude Code CLI not installed (npx fallback failed)', {
+          stderr: error.stderr,
+          executionTimeMs,
+        });
+        return {
+          success: false,
+          error: {
+            code: 'COMMAND_NOT_FOUND',
+            message: 'Claude Code CLI not found. Please install Claude Code to use AI refinement.',
+            details: error.stderr,
           },
           executionTimeMs,
         };
@@ -750,6 +773,25 @@ export async function executeClaudeCodeCLIStreaming(
             code: 'COMMAND_NOT_FOUND',
             message: 'Cannot connect to Claude Code - please ensure it is installed and running',
             details: error.message,
+          },
+          executionTimeMs,
+          sessionId: extractedSessionId,
+        };
+      }
+
+      // npx fallback failed - Claude package not found
+      // stderr contains "could not determine executable to run" when npx can't find the package
+      if (error.stderr?.includes('could not determine executable to run')) {
+        log('WARN', 'Claude Code CLI not installed (npx fallback failed)', {
+          stderr: error.stderr,
+          executionTimeMs,
+        });
+        return {
+          success: false,
+          error: {
+            code: 'COMMAND_NOT_FOUND',
+            message: 'Claude Code CLI not found. Please install Claude Code to use AI refinement.',
+            details: error.stderr,
           },
           executionTimeMs,
           sessionId: extractedSessionId,

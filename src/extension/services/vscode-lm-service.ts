@@ -232,7 +232,7 @@ export async function executeVsCodeLmStreaming(
       return {
         success: false,
         error: {
-          code: 'COMMAND_NOT_FOUND',
+          code: 'COPILOT_NOT_AVAILABLE',
           message:
             'Copilot is not available. Please ensure GitHub Copilot extension is installed and VS Code is 1.89+.',
         },

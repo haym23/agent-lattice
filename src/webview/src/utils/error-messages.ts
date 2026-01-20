@@ -10,6 +10,7 @@ import type { WebviewTranslationKeys } from '../i18n/translation-keys';
 type ErrorCode =
   | 'COMMAND_NOT_FOUND'
   | 'MODEL_NOT_SUPPORTED'
+  | 'COPILOT_NOT_AVAILABLE'
   | 'TIMEOUT'
   | 'PARSE_ERROR'
   | 'VALIDATION_ERROR'
@@ -36,6 +37,10 @@ const ERROR_MESSAGE_MAP: Record<ErrorCode, ErrorMessageInfo> = {
   },
   MODEL_NOT_SUPPORTED: {
     messageKey: 'refinement.error.modelNotSupported',
+    isRetryable: false,
+  },
+  COPILOT_NOT_AVAILABLE: {
+    messageKey: 'refinement.error.copilotNotAvailable',
     isRetryable: false,
   },
   TIMEOUT: {

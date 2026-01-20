@@ -504,6 +504,8 @@ export const enWebviewTranslations: WebviewTranslationKeys = {
     'Claude Code CLI not found. Please install Claude Code to use AI refinement.',
   'refinement.error.modelNotSupported':
     'The selected model is not supported or access is not enabled. You can enable access by selecting and using the model in Copilot Chat once.',
+  'refinement.error.copilotNotAvailable':
+    'Copilot is not available. Please ensure VS Code 1.89+ and GitHub Copilot extension are installed.',
   'refinement.error.timeout':
     'AI refinement timed out. Please adjust the timeout value and try again. Simplifying the request is also recommended.',
   'refinement.error.parseError':

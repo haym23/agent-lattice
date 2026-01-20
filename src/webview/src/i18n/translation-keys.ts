@@ -457,6 +457,7 @@ export interface WebviewTranslationKeys {
   'refinement.error.messageTooLong': string;
   'refinement.error.commandNotFound': string;
   'refinement.error.modelNotSupported': string;
+  'refinement.error.copilotNotAvailable': string;
   'refinement.error.timeout': string;
   'refinement.error.parseError': string;
   'refinement.error.validationError': string;
