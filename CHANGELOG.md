@@ -1,3 +1,16 @@
+## [3.18.0](https://github.com/breaking-brake/cc-wf-studio/compare/v3.17.0...v3.18.0) (2026-01-24)
+
+### Features
+
+* add OpenAI Codex CLI integration support ([#496](https://github.com/breaking-brake/cc-wf-studio/issues/496)) ([60d5c96](https://github.com/breaking-brake/cc-wf-studio/commit/60d5c962b131d195fddbd3795229c9271125514b)), closes [openai/codex#9752](https://github.com/openai/codex/issues/9752)
+
+### Improvements
+
+* add Codex CLI feature announcement banner ([#497](https://github.com/breaking-brake/cc-wf-studio/issues/497)) ([bf8128a](https://github.com/breaking-brake/cc-wf-studio/commit/bf8128a05941f7f136f4401cbf0554a33859e523))
+* add confirmation dialog for Codex project trust setting ([#499](https://github.com/breaking-brake/cc-wf-studio/issues/499)) ([e5523d5](https://github.com/breaking-brake/cc-wf-studio/commit/e5523d53b8ea3e7c3624f5f2cbfeaedf4ae71851))
+* detect skills under .github directory ([#494](https://github.com/breaking-brake/cc-wf-studio/issues/494)) ([eb38d8a](https://github.com/breaking-brake/cc-wf-studio/commit/eb38d8ae87bd2ed447b0debce9eed11159aad5af)), closes [#493](https://github.com/breaking-brake/cc-wf-studio/issues/493) [#493](https://github.com/breaking-brake/cc-wf-studio/issues/493) [#6366f1](https://github.com/breaking-brake/cc-wf-studio/issues/6366f1) [#c2410c](https://github.com/breaking-brake/cc-wf-studio/issues/c2410c)
+* show "Slash Command / Skill" label when Copilot/Codex enabled ([#498](https://github.com/breaking-brake/cc-wf-studio/issues/498)) ([2be7ac6](https://github.com/breaking-brake/cc-wf-studio/commit/2be7ac6ab7f0e1e6221f261a1064c37a6ff3d11c))
+
 ## [3.17.0](https://github.com/breaking-brake/cc-wf-studio/compare/v3.16.1...v3.17.0) (2026-01-22)
 
 ### Features
