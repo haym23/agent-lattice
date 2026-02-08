@@ -1,11 +1,12 @@
+import { analyzeGraph } from './analyzer';
 import { createDefaultEmitterRegistry } from './registry';
-import type { CompileInput, CompileOutput } from './types';
+import type { AnalyzedGraph, CompileInput, CompileOutput } from './types';
 
-function analyzeGraph(input: CompileInput): CompileInput {
+export function buildAnalyzedGraph(input: CompileInput): AnalyzedGraph {
   if (input.workflow.nodes.length === 0) {
     throw new Error('Workflow must contain at least one node');
   }
-  return input;
+  return analyzeGraph(input.workflow.nodes, input.workflow.edges);
 }
 
 function normalizeGraph(input: CompileInput): CompileInput {
@@ -26,9 +27,23 @@ function validateOutput(output: CompileOutput): CompileOutput {
 }
 
 export function compileWorkflow(input: CompileInput): CompileOutput {
-  const analyzed = analyzeGraph(input);
-  const normalized = normalizeGraph(analyzed);
+  const graph = buildAnalyzedGraph(input);
+  const normalized = normalizeGraph(input);
   const registry = createDefaultEmitterRegistry();
   const emitted = registry.emit(normalized);
-  return validateOutput(emitted);
+
+  const graphWarnings: string[] = [];
+  if (graph.cycles.length > 0) {
+    graphWarnings.push(
+      `Graph contains ${graph.cycles.length} cycle(s): ${graph.cycles.map((c) => c.join(' -> ')).join('; ')}`
+    );
+  }
+  if (graph.unreachable.length > 0) {
+    graphWarnings.push(`Unreachable nodes: ${graph.unreachable.join(', ')}`);
+  }
+
+  return validateOutput({
+    ...emitted,
+    warnings: [...graphWarnings, ...emitted.warnings],
+  });
 }

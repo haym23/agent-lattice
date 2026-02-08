@@ -2,6 +2,8 @@ import type { CompileInput, CompileOutput, CompilerEmitter } from '../types';
 
 export class OpenAiAssistantsEmitter implements CompilerEmitter {
   target = 'openai-assistants' as const;
+  name = 'OpenAI Assistants';
+  description = 'Generates OpenAI Assistants API-compatible JSON configuration.';
 
   emit(input: CompileInput): CompileOutput {
     const payload = {
@@ -16,14 +18,24 @@ export class OpenAiAssistantsEmitter implements CompilerEmitter {
       },
     };
 
+    const content = JSON.stringify(payload, null, 2);
+    const warnings: string[] = [];
+    if (input.model.capabilities.promptFormat === 'xml') {
+      warnings.push(
+        `Model ${input.model.displayName} uses xml format; OpenAI target expects function-calling.`
+      );
+    }
+
     return {
       target: this.target,
       files: [
         {
           path: `out/${input.workflow.name}.assistant.json`,
-          content: JSON.stringify(payload, null, 2),
+          content,
         },
       ],
+      preview: content,
+      warnings,
     };
   }
 }

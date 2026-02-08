@@ -18,7 +18,7 @@ describe('workflow integration', () => {
       nodes: [
         {
           id: 'n1',
-          type: 'llmCall' as const,
+          type: 'subAgent' as const,
           label: 'LLM',
           position: { x: 0, y: 0 },
           config: {},

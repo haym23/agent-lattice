@@ -1,12 +1,17 @@
-import { IndexedDbWorkflowRepository } from '../../adapters/persistence/indexeddbWorkflowRepository';
-import { compileWorkflow } from '../../core/compiler/pipeline';
-import type { CompilerTarget } from '../../core/compiler/types';
-import { ModelRegistry } from '../../core/models/registry';
 import { serializeWorkflowFromCanvas } from '../../core/workflow/serialization';
 import type { WorkflowDocument } from '../../core/workflow/types';
+import type { PlatformAdapter } from '../../services/platform-adapter';
+import { WebPlatformAdapter } from '../../services/web-adapter';
 
-const repository = new IndexedDbWorkflowRepository();
-const modelRegistry = new ModelRegistry();
+let adapter: PlatformAdapter = new WebPlatformAdapter();
+
+export function setPlatformAdapter(custom: PlatformAdapter): void {
+  adapter = custom;
+}
+
+export function getPlatformAdapter(): PlatformAdapter {
+  return adapter;
+}
 
 export async function saveCurrentWorkflow(input: {
   id?: string;
@@ -16,27 +21,30 @@ export async function saveCurrentWorkflow(input: {
   edges: Parameters<typeof serializeWorkflowFromCanvas>[0]['edges'];
 }): Promise<WorkflowDocument> {
   const workflow = serializeWorkflowFromCanvas(input);
-  await repository.save(workflow);
+  await adapter.saveWorkflow(workflow.id, workflow);
   return workflow;
 }
 
 export async function listStoredWorkflows(): Promise<WorkflowDocument[]> {
-  return repository.list();
+  return adapter.listWorkflows();
 }
 
 export async function loadStoredWorkflow(id: string): Promise<WorkflowDocument | null> {
-  return repository.load(id);
+  return adapter.loadWorkflow(id);
 }
 
-export function compileForTarget(input: {
+export async function deleteStoredWorkflow(id: string): Promise<void> {
+  await adapter.deleteWorkflow(id);
+}
+
+export async function compileForTarget(input: {
   workflow: WorkflowDocument;
   modelId: string;
-  target: CompilerTarget;
+  target: string;
 }) {
-  const model = modelRegistry.get(input.modelId);
-  return compileWorkflow({ workflow: input.workflow, model, target: input.target });
+  return adapter.compileWorkflow(input.workflow, input.modelId, input.target);
 }
 
 export function listModels() {
-  return modelRegistry.list();
+  return adapter.listModels();
 }

@@ -9,6 +9,7 @@ export function PageShell({ title, description }: PageShellProps): JSX.Element {
   return (
     <>
       <nav className="nav" aria-label="Primary">
+        <Link to="/">Dashboard</Link>
         <Link to="/editor">Editor</Link>
         <Link to="/templates">Templates</Link>
         <Link to="/settings">Settings</Link>

@@ -1,6 +1,18 @@
 import type { Edge, Node } from 'reactflow';
 
-import type { WorkflowDocument, WorkflowEdge, WorkflowNode } from './types';
+import {
+  isWorkflowNodeType,
+  type WorkflowDocument,
+  type WorkflowEdge,
+  type WorkflowNode,
+  type WorkflowNodeType,
+} from './types';
+
+function toWorkflowNodeType(type: string | undefined): WorkflowNodeType {
+  if (!type) return 'subAgent';
+  if (isWorkflowNodeType(type)) return type;
+  return 'subAgent';
+}
 
 export function serializeWorkflowFromCanvas(input: {
   id?: string;
@@ -14,7 +26,7 @@ export function serializeWorkflowFromCanvas(input: {
 
   const nodes: WorkflowNode[] = input.nodes.map((node) => ({
     id: node.id,
-    type: (node.type ?? 'llmCall') as WorkflowNode['type'],
+    type: toWorkflowNodeType(node.type),
     label: String((node.data as Record<string, unknown> | undefined)?.label ?? node.id),
     position: node.position,
     config: (node.data as Record<string, unknown>) ?? {},
@@ -73,6 +85,12 @@ export function validateWorkflowDocument(workflow: WorkflowDocument): void {
   if (workflow.nodes.length > 200) throw new Error('Workflow node limit exceeded');
 
   const nodeIds = new Set(workflow.nodes.map((node) => node.id));
+  for (const node of workflow.nodes) {
+    if (!isWorkflowNodeType(node.type)) {
+      throw new Error(`Unsupported node type: ${node.type}`);
+    }
+  }
+
   for (const edge of workflow.edges) {
     if (!nodeIds.has(edge.source) || !nodeIds.has(edge.target)) {
       throw new Error(`Edge ${edge.id} references missing node`);

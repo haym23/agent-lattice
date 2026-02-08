@@ -1,5 +1,7 @@
-import ReactFlow, { Background, Controls, MiniMap } from 'reactflow';
+import ReactFlow, { Background, Controls, MiniMap, type NodeTypes } from 'reactflow';
 
+import { WORKFLOW_NODE_TYPES } from '../../core/workflow/types';
+import { GenericWorkflowNode } from './GenericWorkflowNode';
 import { useWorkflowStore } from './workflowStore';
 
 import 'reactflow/dist/style.css';
@@ -8,8 +10,12 @@ interface WorkflowCanvasProps {
   searchTerm: string;
 }
 
+const nodeTypes: NodeTypes = Object.fromEntries(
+  WORKFLOW_NODE_TYPES.map((nodeType) => [nodeType, GenericWorkflowNode])
+);
+
 export function WorkflowCanvas({ searchTerm }: WorkflowCanvasProps): JSX.Element {
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect } = useWorkflowStore();
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onNodeClick } = useWorkflowStore();
 
   const displayNodes = nodes.map((node) => {
     const label = String((node.data as Record<string, unknown> | undefined)?.label ?? '');
@@ -36,6 +42,8 @@ export function WorkflowCanvas({ searchTerm }: WorkflowCanvasProps): JSX.Element
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onNodeClick={onNodeClick}
+        nodeTypes={nodeTypes}
         fitView
       >
         <MiniMap />

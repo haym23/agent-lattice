@@ -1,23 +1,33 @@
-export type WorkflowNodeType =
-  | 'start'
-  | 'end'
-  | 'llmCall'
-  | 'promptTemplate'
-  | 'systemInstruction'
-  | 'fewShotBank'
-  | 'conditionalBranch'
-  | 'switchCase'
-  | 'loop'
-  | 'errorHandler'
-  | 'inputForm'
-  | 'fileReader'
-  | 'apiCall'
-  | 'jsonCsvParse'
-  | 'textResponse'
-  | 'fileWriter'
-  | 'webhookPush'
-  | 'flow'
-  | 'humanInTheLoopGate';
+export const WORKFLOW_NODE_TYPES = [
+  'start',
+  'end',
+  'prompt',
+  'subAgent',
+  'askUserQuestion',
+  'ifElse',
+  'switch',
+  'skill',
+  'mcp',
+  'flow',
+  'codex',
+  'branch',
+  'parallel',
+  'httpRequest',
+  'dataTransform',
+  'delay',
+  'webhookTrigger',
+  'variableStore',
+  'codeExecutor',
+  'batchIterator',
+] as const;
+
+export type WorkflowNodeType = (typeof WORKFLOW_NODE_TYPES)[number];
+
+const workflowNodeTypeSet = new Set<string>(WORKFLOW_NODE_TYPES);
+
+export function isWorkflowNodeType(value: string): value is WorkflowNodeType {
+  return workflowNodeTypeSet.has(value);
+}
 
 export interface WorkflowNode {
   id: string;
