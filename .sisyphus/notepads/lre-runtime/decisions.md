@@ -1,0 +1,4 @@
+- 2026-02-08: Kept PlanIR deferred and implemented ExecIR-first flow only (compiler lowering + runtime execution in standalone app).
+- 2026-02-08: Implemented single-model runtime behavior for operations by defaulting LLM execution to `SMALL_EXEC` in lowering/runtime path while retaining type-level model-class compatibility.
+- 2026-02-08: Runtime state model uses explicit namespaces (`$vars/$tmp/$ctx/$in`) through a dedicated `StateStore` class, not UI store state.
+- 2026-02-08: Enforced single-model execution mode in runtime by disabling model escalation/switching in `Runner.executeLlmNode`; IR may still carry escalation metadata for future versions.

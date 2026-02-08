@@ -3,7 +3,7 @@ name: Standalone CI
 on:
   pull_request:
     paths:
-      - 'apps/standalone/**'
+      - 'apps/**'
       - '.github/workflows/standalone-ci.yml'
       - 'package.json'
   push:
@@ -11,7 +11,7 @@ on:
       - main
       - production
     paths:
-      - 'apps/standalone/**'
+      - 'apps/**'
       - '.github/workflows/standalone-ci.yml'
       - 'package.json'
 
@@ -28,7 +28,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
-            apps/standalone/package-lock.json
+            apps/package-lock.json
 
       - name: Install root deps
         run: npm ci

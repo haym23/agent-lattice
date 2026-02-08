@@ -42,36 +42,36 @@ Implemented standalone runtime path with no VSCode API usage.
 
 Implemented persistence abstraction and adapters:
 
-- `apps/standalone/src/core/workflow/repository.ts`
-- `apps/standalone/src/adapters/persistence/indexeddbWorkflowRepository.ts`
-- `apps/standalone/src/adapters/persistence/memoryWorkflowRepository.ts`
+- `apps/src/core/workflow/repository.ts`
+- `apps/src/adapters/persistence/indexeddbWorkflowRepository.ts`
+- `apps/src/adapters/persistence/memoryWorkflowRepository.ts`
 
 Implemented data flow utilities:
 
-- `apps/standalone/src/core/workflow/types.ts`
-- `apps/standalone/src/core/workflow/serialization.ts`
-- `apps/standalone/src/core/workflow/migration.ts`
+- `apps/src/core/workflow/types.ts`
+- `apps/src/core/workflow/serialization.ts`
+- `apps/src/core/workflow/migration.ts`
 
 ### 5) Compiler Foundation + Multi-target Emitters
 
 Implemented compiler pipeline and emitter registry:
 
-- `apps/standalone/src/core/compiler/pipeline.ts`
-- `apps/standalone/src/core/compiler/registry.ts`
-- `apps/standalone/src/core/compiler/types.ts`
+- `apps/src/core/compiler/pipeline.ts`
+- `apps/src/core/compiler/registry.ts`
+- `apps/src/core/compiler/types.ts`
 
 Implemented required Phase 1 emitters:
 
-- `.claude`: `apps/standalone/src/core/compiler/emitters/claudeEmitter.ts`
-- OpenAI Assistants JSON: `apps/standalone/src/core/compiler/emitters/openAiAssistantsEmitter.ts`
-- Portable JSON: `apps/standalone/src/core/compiler/emitters/portableJsonEmitter.ts`
+- `.claude`: `apps/src/core/compiler/emitters/claudeEmitter.ts`
+- OpenAI Assistants JSON: `apps/src/core/compiler/emitters/openAiAssistantsEmitter.ts`
+- Portable JSON: `apps/src/core/compiler/emitters/portableJsonEmitter.ts`
 
 ### 6) Model Registry
 
 Implemented model capability schema and seeded models:
 
-- `apps/standalone/src/core/models/types.ts`
-- `apps/standalone/src/core/models/registry.ts`
+- `apps/src/core/models/types.ts`
+- `apps/src/core/models/registry.ts`
 
 Seeded with:
 
@@ -82,7 +82,7 @@ Seeded with:
 
 Implemented node catalog/contract for 15+ production-usable node definitions:
 
-- `apps/standalone/src/core/nodes/catalog.ts`
+- `apps/src/core/nodes/catalog.ts`
 
 Includes categories for:
 
@@ -105,11 +105,11 @@ Implemented working standalone editor path with:
 
 Key files:
 
-- `apps/standalone/src/features/editor/EditorPage.tsx`
-- `apps/standalone/src/features/editor/WorkflowCanvas.tsx`
-- `apps/standalone/src/features/editor/workflowStore.ts`
-- `apps/standalone/src/features/editor/standaloneWorkflowService.ts`
-- `apps/standalone/src/features/editor/CompilePreviewDialog.tsx`
+- `apps/src/features/editor/EditorPage.tsx`
+- `apps/src/features/editor/WorkflowCanvas.tsx`
+- `apps/src/features/editor/workflowStore.ts`
+- `apps/src/features/editor/standaloneWorkflowService.ts`
+- `apps/src/features/editor/CompilePreviewDialog.tsx`
 
 ### 9) UI System + i18n + Hardening
 
@@ -122,9 +122,9 @@ Implemented:
 
 Key files:
 
-- `apps/standalone/src/app/styles.css`
-- `apps/standalone/src/app/i18n.ts`
-- `apps/standalone/vite.config.ts`
+- `apps/src/app/styles.css`
+- `apps/src/app/i18n.ts`
+- `apps/vite.config.ts`
 
 ### 10) CI and Test Coverage
 
@@ -135,13 +135,13 @@ Added standalone CI workflow and scripts:
 
 Added unit/integration/regression tests, including compiler snapshots:
 
-- `apps/standalone/src/core/workflow/serialization.test.ts`
-- `apps/standalone/src/core/workflow/integration.test.ts`
-- `apps/standalone/src/adapters/persistence/memoryWorkflowRepository.test.ts`
-- `apps/standalone/src/core/models/registry.test.ts`
-- `apps/standalone/src/core/compiler/pipeline.test.ts`
-- `apps/standalone/src/core/nodes/catalog.test.ts`
-- `apps/standalone/src/app/App.test.tsx`
+- `apps/src/core/workflow/serialization.test.ts`
+- `apps/src/core/workflow/integration.test.ts`
+- `apps/src/adapters/persistence/memoryWorkflowRepository.test.ts`
+- `apps/src/core/models/registry.test.ts`
+- `apps/src/core/compiler/pipeline.test.ts`
+- `apps/src/core/nodes/catalog.test.ts`
+- `apps/src/app/App.test.tsx`
 
 ## Verification Results
 

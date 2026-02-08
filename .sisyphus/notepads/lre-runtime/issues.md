@@ -1,0 +1,3 @@
+- 2026-02-08: Build initially failed due to `ImportMeta.env` typing in OpenAI integration. Fixed by env accessor helper using narrowed `import.meta` shape.
+- 2026-02-08: Build initially failed due to missing `@types/jmespath`; added dev dependency to restore strict TS build.
+- 2026-02-08: Testing-library matcher typings (`toBeInTheDocument`, `toBeEnabled`) caused TS errors in one test file; replaced with matcher-free assertions to keep suite green.

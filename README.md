@@ -134,7 +134,24 @@ Copyright (c) 2025 breaking-brake
 Built with [React Flow](https://reactflow.dev/) • Powered by [Claude Code](https://claude.com/claude-code) • Inspired by [Dify](https://dify.ai/)
 
 ---
+---
 
+# Agent Lattice README
+
+## Directory Structure
+
+### Compiler
+
+#### Prompt Handling
+```
+src/core/prompts
+│   registry.ts
+│   types.ts
+└─ templates
+    │   llm-write-v1.ts
+    │   llm-classify-v1.ts
+    └─ repair.ts
+```
 
 ## Notes
 
