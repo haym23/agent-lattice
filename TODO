@@ -1,6 +1,6 @@
 # NEED
 
-- [ ] Build out compiler  
+- [ ] Build out compiler
   - [ ] Add block -> prompt translators for all node types  
   - [ ] Update compiler to use Anthropic best practices
 
@@ -14,17 +14,20 @@
 
 - [ ] Each node should follow Principle of Least Privilege 
 
+- [ ] Export to Claude, Codex, OpenCode, or Github Copilot
+- [ ] Launch with Claude, Codex, OpenCode, or Github Copilot
+
 
 # Want
 
-- [ ] Investigate cloud hosting
-- [ ] Use models without API keys
-- [ ] OAuth login to MCP servers
-- [ ] Implement more base level nodes (like n8n)
-- [ ] Export to Claude, Codex, OpenCode, and Github Copilot
+- [ ] 
 - [ ] Template registry, use out of the box or import into workflow
 - [ ] Tools to help with wording prompts correctly
   - [ ] Suggestions to help improve prompt accuract
   - [ ] Identify actions and intents, confirm to user, replace with blocks
 - [ ] Human readable debugging
+- [ ] Implement more base level nodes (like n8n)
+- [ ] Use models without API keys
+- [ ] OAuth login to MCP servers
+- [ ] Investigate cloud hosting
 - [ ] Context7 code compliance

@@ -134,5 +134,3 @@ Copyright (c) 2025 breaking-brake
 Built with [React Flow](https://reactflow.dev/) • Powered by [Claude Code](https://claude.com/claude-code) • Inspired by [Dify](https://dify.ai/)
 
 ---
-
-**Made with CC Workflow Studio**
