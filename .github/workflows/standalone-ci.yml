@@ -1,0 +1,41 @@
+name: Standalone CI
+
+on:
+  pull_request:
+    paths:
+      - 'apps/standalone/**'
+      - '.github/workflows/standalone-ci.yml'
+      - 'package.json'
+  push:
+    branches:
+      - main
+      - production
+    paths:
+      - 'apps/standalone/**'
+      - '.github/workflows/standalone-ci.yml'
+      - 'package.json'
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            apps/standalone/package-lock.json
+
+      - name: Install root deps
+        run: npm ci
+
+      - name: Install standalone deps
+        working-directory: apps/standalone
+        run: npm ci
+
+      - name: Run standalone checks
+        run: npm run ci:standalone

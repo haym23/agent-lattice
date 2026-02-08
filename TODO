@@ -1,0 +1,22 @@
+# NEED
+
+[ ] Build out compiler  
+  [ ] Add block -> prompt translators for all node types  
+  [ ] Update compiler to use Anthropic best practices
+
+[ ] Update node editors for each node type
+  [ ] Add more styling, icons, adjustable input/output
+  
+[ ] Make header more user friendly
+  [ ] Interactive blocks
+  [ ] Better workflow saving and compiling UX
+  [ ] Fix search
+
+
+# Want
+
+[ ] Investigate cloud hosting
+[ ] Use models without API keys
+[ ] OAuth login to MCP servers
+[ ] Implement more base level nodes (like n8n)
+[ ] Export to Claude, Codex, OpenCode, and Github Copilot

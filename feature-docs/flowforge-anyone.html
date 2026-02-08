@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowForge — Workflows for Everyone</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #FAFAF8;
+  --bg-warm: #F5F3EE;
+  --text: #1a1a1a;
+  --text-mid: #4a4a4a;
+  --text-light: #7a7a7a;
+  --accent: #2563EB;
+  --accent-soft: #DBEAFE;
+  --green: #059669;
+  --green-soft: #D1FAE5;
+  --orange: #D97706;
+  --orange-soft: #FEF3C7;
+  --purple: #7C3AED;
+  --purple-soft: #EDE9FE;
+  --rose: #E11D48;
+  --rose-soft: #FFE4E6;
+  --teal: #0D9488;
+  --teal-soft: #CCFBF1;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 4px 6px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.08);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ====== HERO ====== */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px 24px;
+  position: relative;
+  background: linear-gradient(180deg, #F0F4FF 0%, var(--bg) 100%);
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(37,99,235,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 60%, rgba(124,58,237,0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 100px;
+  font-size: 14px;
+  color: var(--text-mid);
+  margin-bottom: 32px;
+  position: relative;
+  animation: fadeUp 0.8s ease both;
+}
+
+.hero-badge .dot {
+  width: 8px; height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse-dot 2s ease infinite;
+}
+
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(40px, 7vw, 80px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -2px;
+  max-width: 800px;
+  position: relative;
+  animation: fadeUp 0.8s ease 0.1s both;
+}
+
+.hero h1 .highlight {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  font-size: clamp(17px, 2.2vw, 21px);
+  color: var(--text-mid);
+  max-width: 560px;
+  margin-top: 24px;
+  line-height: 1.7;
+  animation: fadeUp 0.8s ease 0.2s both;
+}
+
+.hero-cta {
+  margin-top: 40px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: fadeUp 0.8s ease 0.3s both;
+}
+
+.hero-cta a {
+  padding: 14px 32px;
+  border-radius: 100px;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(37,99,235,0.4); }
+
+.btn-secondary {
+  background: white;
+  color: var(--text);
+  border: 1px solid #D1D5DB;
+}
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ====== SECTION COMMON ====== */
+section {
+  padding: 100px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1.15;
+  max-width: 700px;
+}
+
+.section-subtitle {
+  font-size: 18px;
+  color: var(--text-mid);
+  max-width: 600px;
+  margin-top: 16px;
+  line-height: 1.7;
+}
+
+/* ====== THE PITCH ====== */
+.pitch-section { text-align: center; }
+.pitch-section .section-title { margin: 0 auto; }
+.pitch-section .section-subtitle { margin: 16px auto 0; }
+
+.pitch-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 60px;
+}
+
+.pitch-card {
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--radius);
+  padding: 36px 28px;
+  text-align: left;
+  transition: all 0.3s ease;
+}
+.pitch-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: transparent;
+}
+
+.pitch-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.pitch-card h3 {
+  font-size: 19px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.pitch-card p {
+  font-size: 15px;
+  color: var(--text-mid);
+  line-height: 1.65;
+}
+
+/* ====== WORKFLOW STORIES ====== */
+.stories-section {
+  padding-top: 60px;
+}
+
+.story-tabs {
+  display: flex;
+  gap: 8px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+
+.story-tab {
+  padding: 10px 22px;
+  border-radius: 100px;
+  border: 1px solid #D1D5DB;
+  background: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-mid);
+  font-family: 'DM Sans', sans-serif;
+}
+.story-tab:hover { border-color: var(--accent); color: var(--accent); }
+.story-tab.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.story-content {
+  margin-top: 40px;
+  display: none;
+  animation: fadeUp 0.5s ease both;
+}
+.story-content.active { display: block; }
+
+.story-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.story-text h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.story-persona {
+  font-size: 15px;
+  color: var(--accent);
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.story-problem,
+.story-solution {
+  margin-bottom: 20px;
+}
+
+.story-problem h4,
+.story-solution h4 {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+.story-problem h4 { color: var(--rose); }
+.story-solution h4 { color: var(--green); }
+
+.story-problem p,
+.story-solution p {
+  font-size: 15px;
+  color: var(--text-mid);
+  line-height: 1.7;
+}
+
+.story-result {
+  background: var(--green-soft);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  font-size: 15px;
+  color: #065F46;
+  font-weight: 500;
+}
+
+/* ====== WORKFLOW DIAGRAM ====== */
+.workflow-diagram {
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--radius);
+  padding: 32px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.workflow-diagram::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.wd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.wd-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-mid);
+}
+
+.wd-model {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.wd-nodes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wd-node {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #E5E7EB;
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.wd-node .node-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.wd-node .node-label { flex: 1; }
+.wd-node .node-type {
+  font-size: 11px;
+  color: var(--text-light);
+  font-weight: 400;
+}
+
+.wd-connector {
+  display: flex;
+  justify-content: center;
+  padding: 2px 0;
+}
+.wd-connector svg { color: #D1D5DB; }
+
+.wd-branch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.wd-branch .wd-node { font-size: 13px; }
+.wd-branch-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+  padding: 4px 0;
+}
+
+/* Node color themes */
+.node-input .node-icon { background: var(--accent-soft); color: var(--accent); }
+.node-ai .node-icon { background: var(--purple-soft); color: var(--purple); }
+.node-logic .node-icon { background: var(--orange-soft); color: var(--orange); }
+.node-action .node-icon { background: var(--green-soft); color: var(--green); }
+.node-data .node-icon { background: var(--teal-soft); color: var(--teal); }
+.node-output .node-icon { background: var(--rose-soft); color: var(--rose); }
+
+.node-input { border-left: 3px solid var(--accent); }
+.node-ai { border-left: 3px solid var(--purple); }
+.node-logic { border-left: 3px solid var(--orange); }
+.node-action { border-left: 3px solid var(--green); }
+.node-data { border-left: 3px solid var(--teal); }
+.node-output { border-left: 3px solid var(--rose); }
+
+/* ====== HOW IT WORKS ====== */
+.how-section {
+  background: white;
+  border-radius: var(--radius);
+  border: 1px solid #E5E7EB;
+  padding: 80px 60px;
+  margin: 0 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.how-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
+  margin-top: 60px;
+  text-align: left;
+}
+
+.how-step {
+  position: relative;
+}
+
+.how-step-num {
+  font-family: 'Fraunces', serif;
+  font-size: 48px;
+  font-weight: 700;
+  color: #F0F0F0;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.how-step h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.how-step p {
+  font-size: 14px;
+  color: var(--text-mid);
+  line-height: 1.65;
+}
+
+/* ====== MORE IDEAS ====== */
+.ideas-section { text-align: center; }
+.ideas-section .section-title { margin: 0 auto; }
+.ideas-section .section-subtitle { margin: 16px auto 0; }
+
+.ideas-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 50px;
+  text-align: left;
+}
+
+.idea-card {
+  display: flex;
+  gap: 16px;
+  padding: 24px;
+  border-radius: var(--radius-sm);
+  background: white;
+  border: 1px solid #E5E7EB;
+  transition: all 0.2s ease;
+}
+.idea-card:hover { border-color: var(--accent); }
+
+.idea-emoji {
+  font-size: 28px;
+  flex-shrink: 0;
+  width: 48px; height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-warm);
+  border-radius: 12px;
+}
+
+.idea-card h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.idea-card p {
+  font-size: 14px;
+  color: var(--text-mid);
+  line-height: 1.6;
+}
+
+.idea-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 100px;
+  margin-top: 8px;
+}
+.tag-personal { background: var(--purple-soft); color: var(--purple); }
+.tag-work { background: var(--accent-soft); color: var(--accent); }
+.tag-creative { background: var(--orange-soft); color: var(--orange); }
+.tag-health { background: var(--green-soft); color: var(--green); }
+
+/* ====== CTA ====== */
+.cta-section {
+  text-align: center;
+  padding: 100px 24px 120px;
+}
+
+.cta-box {
+  max-width: 700px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #1E3A5F 0%, #1a1a2e 100%);
+  border-radius: 24px;
+  padding: 60px 48px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-box::before {
+  content: '';
+  position: absolute;
+  top: -50%; right: -30%;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(37,99,235,0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cta-box h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.cta-box p {
+  color: rgba(255,255,255,0.75);
+  font-size: 17px;
+  max-width: 480px;
+  margin: 0 auto 32px;
+  line-height: 1.7;
+  position: relative;
+}
+
+.cta-box a {
+  display: inline-block;
+  padding: 14px 36px;
+  background: white;
+  color: #1a1a2e;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 16px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  position: relative;
+}
+.cta-box a:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(255,255,255,0.2); }
+
+/* ====== ANIMATIONS ====== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 900px) {
+  .pitch-grid { grid-template-columns: 1fr; }
+  .story-layout { grid-template-columns: 1fr; }
+  .how-steps { grid-template-columns: repeat(2, 1fr); }
+  .ideas-grid { grid-template-columns: 1fr; }
+  .how-section { padding: 48px 28px; margin: 0 16px; }
+}
+
+@media (max-width: 600px) {
+  .how-steps { grid-template-columns: 1fr; }
+  .wd-branch { grid-template-columns: 1fr; }
+  .cta-box { padding: 40px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ====== HERO ====== -->
+<div class="hero">
+  <div class="hero-badge"><span class="dot"></span> No code. No prompts. Just drag, connect, done.</div>
+  <h1>Build AI workflows<br>for <span class="highlight">your real life</span></h1>
+  <p>FlowForge turns the complexity of AI agents into something anyone can build — visually. Whether you're running a business or organizing your morning, just drag, connect, and let it run.</p>
+  <div class="hero-cta">
+    <a href="#stories" class="btn-primary">See examples ↓</a>
+    <a href="#how" class="btn-secondary">How it works</a>
+  </div>
+</div>
+
+<!-- ====== THE PITCH ====== -->
+<section class="pitch-section">
+  <div class="section-label reveal">Why FlowForge</div>
+  <h2 class="section-title reveal">AI is powerful. But right now,<br>only engineers can use it fully.</h2>
+  <p class="section-subtitle reveal">Make.com connects apps. ChatGPT answers questions. FlowForge lets you build intelligent, multi-step workflows that think, decide, and act — without writing a single prompt.</p>
+
+  <div class="pitch-grid">
+    <div class="pitch-card reveal">
+      <div class="pitch-icon" style="background: var(--accent-soft); color: var(--accent);">🧩</div>
+      <h3>Drag. Connect. Done.</h3>
+      <p>Every action is a visual block. Drag an "AI Summarize" block, connect it to "Send Email," and you've just built your first agent. No syntax, no API keys to manage, no prompt engineering.</p>
+    </div>
+    <div class="pitch-card reveal">
+      <div class="pitch-icon" style="background: var(--purple-soft); color: var(--purple);">🧠</div>
+      <h3>The compiler does the hard part</h3>
+      <p>Behind the scenes, FlowForge's compiler translates your visual workflow into perfectly structured prompts — optimized for whichever AI model you choose. You design the "what." It handles the "how."</p>
+    </div>
+    <div class="pitch-card reveal">
+      <div class="pitch-icon" style="background: var(--green-soft); color: var(--green);">🔄</div>
+      <h3>Works with any AI model</h3>
+      <p>Claude, GPT, Gemini, Llama, Mistral — pick the best model for the job, or let FlowForge recommend one. Switch models with a single click; the compiler adapts automatically.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ====== WORKFLOW STORIES ====== -->
+<section class="stories-section" id="stories">
+  <div class="section-label reveal">Real workflows for real people</div>
+  <h2 class="section-title reveal">What would you build?</h2>
+  <p class="section-subtitle reveal">These aren't hypotheticals. Each one is a workflow you could build in under 10 minutes, with zero coding experience.</p>
+
+  <div class="story-tabs reveal">
+    <button class="story-tab active" onclick="showStory('freelancer')">Freelancer</button>
+    <button class="story-tab" onclick="showStory('parent')">Busy Parent</button>
+    <button class="story-tab" onclick="showStory('teacher')">Teacher</button>
+    <button class="story-tab" onclick="showStory('manager')">Team Manager</button>
+    <button class="story-tab" onclick="showStory('creator')">Content Creator</button>
+    <button class="story-tab" onclick="showStory('student')">Student</button>
+  </div>
+
+  <!-- FREELANCER -->
+  <div class="story-content active" id="story-freelancer">
+    <div class="story-layout">
+      <div class="story-text">
+        <h3>The Invoice Chaser</h3>
+        <div class="story-persona">Maya, freelance graphic designer</div>
+        <div class="story-problem">
+          <h4>😫 The problem</h4>
+          <p>Maya has 12 active clients. She loses track of who's paid, who's overdue, and dreads writing awkward follow-up emails. She spends Sunday evenings checking spreadsheets and composing polite-but-firm reminders.</p>
+        </div>
+        <div class="story-solution">
+          <h4>✨ The workflow</h4>
+          <p>Every Monday at 9am, FlowForge reads her invoice spreadsheet, identifies anything overdue, drafts a personalized follow-up email for each client (friendly for 1 week late, firm for 30+ days), and drops them in her Gmail drafts for a quick review before sending.</p>
+        </div>
+        <div class="story-result">
+          ⏱ Saves ~3 hours/week · 💰 Gets paid 40% faster · 😌 No more awkward Sundays
+        </div>
+      </div>
+      <div class="workflow-diagram" style="--accent-bar: var(--accent);">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:var(--accent);border-radius:16px 16px 0 0;"></div>
+        <div class="wd-header">
+          <div class="wd-title">invoice-follow-up.flow</div>
+          <div class="wd-model">Claude Sonnet</div>
+        </div>
+        <div class="wd-nodes">
+          <div class="wd-node node-input"><div class="node-icon">⏰</div><div><div class="node-label">Schedule: Every Monday 9am</div><div class="node-type">Trigger</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-data"><div class="node-icon">📊</div><div><div class="node-label">Read Invoice Spreadsheet</div><div class="node-type">Google Sheets</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-logic"><div class="node-icon">🔀</div><div><div class="node-label">Filter: Overdue Invoices Only</div><div class="node-type">Condition</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-ai"><div class="node-icon">✍️</div><div><div class="node-label">Draft Follow-Up Email</div><div class="node-type">AI: tone based on days overdue</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-output"><div class="node-icon">📧</div><div><div class="node-label">Save to Gmail Drafts</div><div class="node-type">Output</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARENT -->
+  <div class="story-content" id="story-parent">
+    <div class="story-layout">
+      <div class="story-text">
+        <h3>The Family Week Planner</h3>
+        <div class="story-persona">Carlos, father of two, works full-time</div>
+        <div class="story-problem">
+          <h4>😫 The problem</h4>
+          <p>Every Sunday is a scramble. What's for dinner this week? Do the kids have anything after school? What groceries do we need? Carlos and his partner spend an hour piecing it together from memory, texts, and school emails.</p>
+        </div>
+        <div class="story-solution">
+          <h4>✨ The workflow</h4>
+          <p>Sunday morning, FlowForge pulls the family's shared calendar events, checks what's in the pantry list, generates a 5-day meal plan that avoids repeat ingredients, creates a grocery list, and sends the whole plan to the family group chat as a clean summary.</p>
+        </div>
+        <div class="story-result">
+          🍽 Meals planned in 30 seconds · 🛒 Grocery list auto-generated · 🧘 Sundays reclaimed
+        </div>
+      </div>
+      <div class="workflow-diagram">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:var(--green);border-radius:16px 16px 0 0;"></div>
+        <div class="wd-header">
+          <div class="wd-title">family-week-plan.flow</div>
+          <div class="wd-model">GPT-4o</div>
+        </div>
+        <div class="wd-nodes">
+          <div class="wd-node node-input"><div class="node-icon">⏰</div><div><div class="node-label">Schedule: Sunday 8am</div><div class="node-type">Trigger</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-data"><div class="node-icon">📅</div><div><div class="node-label">Read Family Calendar</div><div class="node-type">Google Calendar</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-data"><div class="node-icon">🥫</div><div><div class="node-label">Check Pantry List</div><div class="node-type">Shared Note</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-ai"><div class="node-icon">🍳</div><div><div class="node-label">Generate Meal Plan + Grocery List</div><div class="node-type">AI: dietary prefs, calendar-aware</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-output"><div class="node-icon">💬</div><div><div class="node-label">Send to Family Group Chat</div><div class="node-type">iMessage / WhatsApp</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEACHER -->
+  <div class="story-content" id="story-teacher">
+    <div class="story-layout">
+      <div class="story-text">
+        <h3>The Feedback Multiplier</h3>
+        <div class="story-persona">Priya, high school English teacher</div>
+        <div class="story-problem">
+          <h4>😫 The problem</h4>
+          <p>Priya has 120 students and spends entire weekends writing individualized feedback on essays. The comments are thoughtful but the volume is crushing. She wants every student to feel seen, but she's burning out.</p>
+        </div>
+        <div class="story-solution">
+          <h4>✨ The workflow</h4>
+          <p>Students submit essays to a shared folder. FlowForge reads each one, generates detailed feedback based on Priya's rubric and teaching style (which she described once in plain English), highlights strengths and areas for growth, and creates a summary spreadsheet so Priya can review and adjust before returning them.</p>
+        </div>
+        <div class="story-result">
+          📝 120 essays get feedback in minutes · ✅ Priya reviews & personalizes in ~1 hour · 🌟 Every student gets detailed comments
+        </div>
+      </div>
+      <div class="workflow-diagram">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:var(--purple);border-radius:16px 16px 0 0;"></div>
+        <div class="wd-header">
+          <div class="wd-title">essay-feedback.flow</div>
+          <div class="wd-model">Claude Opus</div>
+        </div>
+        <div class="wd-nodes">
+          <div class="wd-node node-input"><div class="node-icon">📁</div><div><div class="node-label">Watch: Student Submissions Folder</div><div class="node-type">Google Drive Trigger</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-data"><div class="node-icon">📄</div><div><div class="node-label">Read Essay Content</div><div class="node-type">File Reader (PDF/DOCX)</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-ai"><div class="node-icon">📋</div><div><div class="node-label">Evaluate Against Rubric</div><div class="node-type">AI: Priya's rubric + teaching voice</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-ai"><div class="node-icon">✍️</div><div><div class="node-label">Write Personalized Feedback</div><div class="node-type">AI: strengths + growth areas</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-output"><div class="node-icon">📊</div><div><div class="node-label">Add to Summary Spreadsheet</div><div class="node-type">Google Sheets</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANAGER -->
+  <div class="story-content" id="story-manager">
+    <div class="story-layout">
+      <div class="story-text">
+        <h3>The Standup Synthesizer</h3>
+        <div class="story-persona">Jordan, engineering team lead (8 reports)</div>
+        <div class="story-problem">
+          <h4>😫 The problem</h4>
+          <p>Jordan's team posts async standups in Slack every morning. But reading 8 updates, spotting blockers, and figuring out who needs help takes 30 minutes. By the time Jordan responds, the team has moved on.</p>
+        </div>
+        <div class="story-solution">
+          <h4>✨ The workflow</h4>
+          <p>At 10am, FlowForge reads the standup channel, identifies blockers and dependencies between team members, drafts a 3-line team summary, flags anyone who seems stuck, and DMs Jordan a digest with suggested actions — all before the morning coffee gets cold.</p>
+        </div>
+        <div class="story-result">
+          🎯 Blockers spotted instantly · ⏱ 30 min → 2 min review · 🤝 Team feels more supported
+        </div>
+      </div>
+      <div class="workflow-diagram">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:var(--orange);border-radius:16px 16px 0 0;"></div>
+        <div class="wd-header">
+          <div class="wd-title">standup-digest.flow</div>
+          <div class="wd-model">Gemini 2.0</div>
+        </div>
+        <div class="wd-nodes">
+          <div class="wd-node node-input"><div class="node-icon">⏰</div><div><div class="node-label">Schedule: Weekdays 10am</div><div class="node-type">Trigger</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-data"><div class="node-icon">💬</div><div><div class="node-label">Read #standup Channel</div><div class="node-type">Slack: last 24 hours</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-ai"><div class="node-icon">🔍</div><div><div class="node-label">Identify Blockers & Dependencies</div><div class="node-type">AI: cross-reference updates</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-ai"><div class="node-icon">📝</div><div><div class="node-label">Generate Digest + Actions</div><div class="node-type">AI: summary with recommendations</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-output"><div class="node-icon">📩</div><div><div class="node-label">DM Jordan on Slack</div><div class="node-type">Output: Direct Message</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT CREATOR -->
+  <div class="story-content" id="story-creator">
+    <div class="story-layout">
+      <div class="story-text">
+        <h3>The Content Repurposer</h3>
+        <div class="story-persona">Aisha, YouTube creator + newsletter writer</div>
+        <div class="story-problem">
+          <h4>😫 The problem</h4>
+          <p>Aisha records a 20-minute YouTube video every week. She knows she should repurpose it into a newsletter, tweet thread, and LinkedIn post — but reformatting the same ideas across platforms takes longer than making the video itself.</p>
+        </div>
+        <div class="story-solution">
+          <h4>✨ The workflow</h4>
+          <p>When a new video is published, FlowForge grabs the transcript, generates a newsletter draft in her voice, creates a Twitter thread pulling the key insights, writes a LinkedIn post with a professional angle, and saves everything to her Notion content calendar — ready for review.</p>
+        </div>
+        <div class="story-result">
+          📹 1 video → 4 content pieces · ⏱ 4 hours of work → 15 minutes of review · 📈 3x more consistent posting
+        </div>
+      </div>
+      <div class="workflow-diagram">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:var(--rose);border-radius:16px 16px 0 0;"></div>
+        <div class="wd-header">
+          <div class="wd-title">content-repurpose.flow</div>
+          <div class="wd-model">Claude Sonnet</div>
+        </div>
+        <div class="wd-nodes">
+          <div class="wd-node node-input"><div class="node-icon">📹</div><div><div class="node-label">New Video Published</div><div class="node-type">YouTube Trigger</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-data"><div class="node-icon">📝</div><div><div class="node-label">Get Video Transcript</div><div class="node-type">YouTube API</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-branch">
+            <div>
+              <div class="wd-branch-label" style="color: var(--purple);">Branch A</div>
+              <div class="wd-node node-ai"><div class="node-icon">📰</div><div><div class="node-label">Newsletter Draft</div><div class="node-type">AI: Aisha's voice</div></div></div>
+            </div>
+            <div>
+              <div class="wd-branch-label" style="color: var(--teal);">Branch B</div>
+              <div class="wd-node node-ai"><div class="node-icon">🐦</div><div><div class="node-label">Twitter Thread</div><div class="node-type">AI: punchy + hooks</div></div></div>
+            </div>
+          </div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-output"><div class="node-icon">📋</div><div><div class="node-label">Save All to Notion Calendar</div><div class="node-type">Notion API</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUDENT -->
+  <div class="story-content" id="story-student">
+    <div class="story-layout">
+      <div class="story-text">
+        <h3>The Study Session Builder</h3>
+        <div class="story-persona">Liam, college junior studying biochemistry</div>
+        <div class="story-problem">
+          <h4>😫 The problem</h4>
+          <p>Liam has lecture recordings, PDF slides, and a textbook — but turning all of that into effective study materials takes hours. He makes flashcards by hand, forgets to review them on schedule, and always feels underprepared for exams.</p>
+        </div>
+        <div class="story-solution">
+          <h4>✨ The workflow</h4>
+          <p>After each lecture, Liam drops the slides into a folder. FlowForge reads them, generates flashcards with spaced repetition scheduling, creates a one-page summary of key concepts, identifies connections to previous lectures, and sends him a daily study reminder with the cards due for review.</p>
+        </div>
+        <div class="story-result">
+          🎓 Flashcards auto-generated from lectures · 🧠 Spaced repetition built in · 📱 Daily study nudge on his phone
+        </div>
+      </div>
+      <div class="workflow-diagram">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:var(--teal);border-radius:16px 16px 0 0;"></div>
+        <div class="wd-header">
+          <div class="wd-title">study-prep.flow</div>
+          <div class="wd-model">Gemini 2.0</div>
+        </div>
+        <div class="wd-nodes">
+          <div class="wd-node node-input"><div class="node-icon">📁</div><div><div class="node-label">New File in Lecture Slides Folder</div><div class="node-type">Google Drive Trigger</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-data"><div class="node-icon">📄</div><div><div class="node-label">Extract Slide Content</div><div class="node-type">PDF Reader</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-ai"><div class="node-icon">🃏</div><div><div class="node-label">Generate Flashcards + Summary</div><div class="node-type">AI: key concepts, Q&A pairs</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-ai"><div class="node-icon">🔗</div><div><div class="node-label">Connect to Previous Lectures</div><div class="node-type">AI: cross-reference past notes</div></div></div>
+          <div class="wd-connector"><svg width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="4 3"/></svg></div>
+          <div class="wd-node node-output"><div class="node-icon">📱</div><div><div class="node-label">Schedule Daily Review Reminders</div><div class="node-type">Notification: spaced repetition</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== HOW IT WORKS ====== -->
+<div class="how-section reveal" id="how">
+  <div class="section-label">How it works</div>
+  <h2 class="section-title" style="margin: 0 auto;">Four steps. No engineering degree required.</h2>
+
+  <div class="how-steps">
+    <div class="how-step">
+      <div class="how-step-num">01</div>
+      <h3>Describe or browse</h3>
+      <p>Tell FlowForge what you want in plain English ("remind me to follow up on unpaid invoices every week") or browse the template library for inspiration.</p>
+    </div>
+    <div class="how-step">
+      <div class="how-step-num">02</div>
+      <h3>Drag & connect</h3>
+      <p>Your workflow appears as visual blocks on a canvas. Rearrange them, add steps, connect the dots. Each block has simple settings — no code, no prompt syntax.</p>
+    </div>
+    <div class="how-step">
+      <div class="how-step-num">03</div>
+      <h3>Pick your AI</h3>
+      <p>Choose which model powers the smart steps. The compiler automatically optimizes the prompts behind the scenes for whichever model you pick. Or just leave it on auto.</p>
+    </div>
+    <div class="how-step">
+      <div class="how-step-num">04</div>
+      <h3>Run it</h3>
+      <p>Hit play. Watch it execute in real-time with a live log. Set it on a schedule, trigger it from an event, or run it manually whenever you need it.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MORE IDEAS ====== -->
+<section class="ideas-section">
+  <div class="section-label reveal">Spark your imagination</div>
+  <h2 class="section-title reveal">20 more workflows anyone can build</h2>
+  <p class="section-subtitle reveal">Work, life, creativity, health — if there's a repetitive task that involves thinking, FlowForge can handle it.</p>
+
+  <div class="ideas-grid">
+    <div class="idea-card reveal">
+      <div class="idea-emoji">🏠</div>
+      <div>
+        <h4>Morning Briefing</h4>
+        <p>Wake up to a personalized digest: today's weather, calendar, commute time, and top 3 news stories — delivered to your phone at 6:30am.</p>
+        <span class="idea-tag tag-personal">Personal</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">📧</div>
+      <div>
+        <h4>Email Triage</h4>
+        <p>AI reads your inbox, labels by urgency, drafts quick replies for routine emails, and flags anything that actually needs your brain.</p>
+        <span class="idea-tag tag-work">Work</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">🍎</div>
+      <div>
+        <h4>Recipe from Leftovers</h4>
+        <p>Snap a photo of what's in your fridge. AI identifies the ingredients and suggests 3 recipes you can make tonight, with step-by-step instructions.</p>
+        <span class="idea-tag tag-personal">Personal</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">📊</div>
+      <div>
+        <h4>Weekly Sales Report</h4>
+        <p>Pull data from your CRM, calculate trends, generate a narrative summary with charts, and email it to stakeholders every Friday at 4pm.</p>
+        <span class="idea-tag tag-work">Work</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">🎵</div>
+      <div>
+        <h4>Mood Playlist</h4>
+        <p>Tell FlowForge how you're feeling. It curates a Spotify playlist based on your mood, listening history, and the weather outside.</p>
+        <span class="idea-tag tag-creative">Creative</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">🐛</div>
+      <div>
+        <h4>Bug Report Enricher</h4>
+        <p>When a bug ticket is created, auto-search for related past issues, pull relevant logs, suggest a severity level, and assign to the right team member.</p>
+        <span class="idea-tag tag-work">Work</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">✈️</div>
+      <div>
+        <h4>Trip Planner</h4>
+        <p>Give it your destination, dates, budget, and interests. Get a day-by-day itinerary with bookings, restaurant suggestions, and a packing list.</p>
+        <span class="idea-tag tag-personal">Personal</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">💪</div>
+      <div>
+        <h4>Workout Logger</h4>
+        <p>After each gym session, voice-dictate what you did. AI parses it into structured data, tracks progressive overload, and adjusts next week's plan.</p>
+        <span class="idea-tag tag-health">Health</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">📚</div>
+      <div>
+        <h4>Reading List Curator</h4>
+        <p>Based on books you've liked, AI finds new recommendations, checks your library for availability, and adds holds automatically.</p>
+        <span class="idea-tag tag-personal">Personal</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">🏢</div>
+      <div>
+        <h4>Meeting Notes to Tasks</h4>
+        <p>Record a meeting. AI transcribes it, extracts action items with owners and deadlines, and creates tasks in Asana or Jira automatically.</p>
+        <span class="idea-tag tag-work">Work</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">🎨</div>
+      <div>
+        <h4>Design Brief Generator</h4>
+        <p>Describe a project in casual language. AI structures it into a proper creative brief with goals, audience, tone, deliverables, and timeline.</p>
+        <span class="idea-tag tag-creative">Creative</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">💊</div>
+      <div>
+        <h4>Medication Reminder</h4>
+        <p>Track medications with smart reminders that know your schedule. If you miss one, it adjusts the next dose timing and logs everything.</p>
+        <span class="idea-tag tag-health">Health</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">🏦</div>
+      <div>
+        <h4>Expense Categorizer</h4>
+        <p>Forward receipts to an email. AI extracts the amount, vendor, and category, adds it to your budget spreadsheet, and alerts if you're over budget.</p>
+        <span class="idea-tag tag-personal">Personal</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">🌱</div>
+      <div>
+        <h4>Garden Care Schedule</h4>
+        <p>Enter your plants and location. AI creates a watering and fertilizing schedule based on local weather forecasts and sends daily reminders.</p>
+        <span class="idea-tag tag-personal">Personal</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">📰</div>
+      <div>
+        <h4>Industry News Scanner</h4>
+        <p>AI scans 50+ sources in your industry daily, filters for relevance, and delivers a 5-bullet summary of what actually matters to your work.</p>
+        <span class="idea-tag tag-work">Work</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">🎭</div>
+      <div>
+        <h4>Social Media Scheduler</h4>
+        <p>Write one core idea. AI adapts it for Instagram, LinkedIn, Twitter, and TikTok — matching each platform's style — and schedules optimal posting times.</p>
+        <span class="idea-tag tag-creative">Creative</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">🧘</div>
+      <div>
+        <h4>Daily Reflection Journal</h4>
+        <p>Every evening, FlowForge asks you 3 simple questions. AI spots patterns over time — what makes your good days good — and shares weekly insights.</p>
+        <span class="idea-tag tag-health">Health</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">🔧</div>
+      <div>
+        <h4>Home Maintenance Tracker</h4>
+        <p>AI builds a maintenance schedule for your home — HVAC filters, gutter cleaning, smoke detector batteries — and reminds you before things break.</p>
+        <span class="idea-tag tag-personal">Personal</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">👔</div>
+      <div>
+        <h4>Job Application Tracker</h4>
+        <p>Save job listings. AI tailors your resume bullet points for each role, tracks application status, and reminds you to follow up after 5 days.</p>
+        <span class="idea-tag tag-work">Work</span>
+      </div>
+    </div>
+    <div class="idea-card reveal">
+      <div class="idea-emoji">🎁</div>
+      <div>
+        <h4>Gift Idea Generator</h4>
+        <p>Track birthdays and interests for friends and family. Two weeks before each birthday, get personalized gift suggestions within your budget.</p>
+        <span class="idea-tag tag-personal">Personal</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== CTA ====== -->
+<section class="cta-section">
+  <div class="cta-box reveal">
+    <h2>Your first workflow is 10 minutes away.</h2>
+    <p>Pick one thing that eats your time every week. Build a workflow for it. Let AI handle the boring parts so you can focus on what matters.</p>
+    <a href="#">Start Building — Free</a>
+  </div>
+</section>
+
+<script>
+function showStory(id) {
+  document.querySelectorAll('.story-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.story-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('story-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
