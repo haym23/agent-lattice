@@ -134,3 +134,14 @@ Copyright (c) 2025 breaking-brake
 Built with [React Flow](https://reactflow.dev/) • Powered by [Claude Code](https://claude.com/claude-code) • Inspired by [Dify](https://dify.ai/)
 
 ---
+
+
+## Notes
+
+### Use Cases
+
+- Developer: Well structured workflows could replace APIs. Run cheap models with lots of validation and coverage and you have replaced the need for a backend API
+- Busy Mom: Organize dinner plans between family. Send a text in the morning, family deliberates, short summary and shopping list is ready for when mom goes to grocery store after work.
+- Young Professional: A busy employee takes a call while driving to meet a customer. The entire meeting is summarized and waiting in his notes by the time he is back to the office.
+- Developer: Come in Monday morning, have a flow to summarize Jira tasks for the sprint and give suggested solution. Using a series of templates and AI tools, you make workflows for each task in just a few hours. Once workflows are approved they can be run and you can have PRs ready by the time you're back from lunch
+- Fantasy Diehard: You love fantasy football, but live a busy life and don't have time to check all the news. Automatically get NFL news from RSS feeds, then place waiver claims through Sleeper API. You also get automated trade ideas based on team and player news.
