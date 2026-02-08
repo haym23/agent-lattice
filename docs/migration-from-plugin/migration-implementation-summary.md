@@ -20,7 +20,7 @@ Created migration baseline and governance docs:
 
 Introduced a new standalone app at:
 
-- `apps/standalone`
+- `app`
 
 Includes:
 
@@ -34,44 +34,44 @@ Includes:
 Implemented standalone runtime path with no VSCode API usage.
 
 - Added root verification script:
-  - `verify:no-vscode-in-standalone`
+  - `verify:no-vscode-in-app`
 - Enforced by standalone CI command:
-  - `npm run ci:standalone`
+  - `npm run ci:app`
 
 ### 4) Persistence Migration (Filesystem -> IndexedDB)
 
 Implemented persistence abstraction and adapters:
 
-- `apps/src/core/workflow/repository.ts`
-- `apps/src/adapters/persistence/indexeddbWorkflowRepository.ts`
-- `apps/src/adapters/persistence/memoryWorkflowRepository.ts`
+- `app/src/core/workflow/repository.ts`
+- `app/src/adapters/persistence/indexeddbWorkflowRepository.ts`
+- `app/src/adapters/persistence/memoryWorkflowRepository.ts`
 
 Implemented data flow utilities:
 
-- `apps/src/core/workflow/types.ts`
-- `apps/src/core/workflow/serialization.ts`
-- `apps/src/core/workflow/migration.ts`
+- `app/src/core/workflow/types.ts`
+- `app/src/core/workflow/serialization.ts`
+- `app/src/core/workflow/migration.ts`
 
 ### 5) Compiler Foundation + Multi-target Emitters
 
 Implemented compiler pipeline and emitter registry:
 
-- `apps/src/core/compiler/pipeline.ts`
-- `apps/src/core/compiler/registry.ts`
-- `apps/src/core/compiler/types.ts`
+- `app/src/core/compiler/pipeline.ts`
+- `app/src/core/compiler/registry.ts`
+- `app/src/core/compiler/types.ts`
 
 Implemented required Phase 1 emitters:
 
-- `.claude`: `apps/src/core/compiler/emitters/claudeEmitter.ts`
-- OpenAI Assistants JSON: `apps/src/core/compiler/emitters/openAiAssistantsEmitter.ts`
-- Portable JSON: `apps/src/core/compiler/emitters/portableJsonEmitter.ts`
+- `.claude`: `app/src/core/compiler/emitters/claudeEmitter.ts`
+- OpenAI Assistants JSON: `app/src/core/compiler/emitters/openAiAssistantsEmitter.ts`
+- Portable JSON: `app/src/core/compiler/emitters/portableJsonEmitter.ts`
 
 ### 6) Model Registry
 
 Implemented model capability schema and seeded models:
 
-- `apps/src/core/models/types.ts`
-- `apps/src/core/models/registry.ts`
+- `app/src/core/models/types.ts`
+- `app/src/core/models/registry.ts`
 
 Seeded with:
 
@@ -82,7 +82,7 @@ Seeded with:
 
 Implemented node catalog/contract for 15+ production-usable node definitions:
 
-- `apps/src/core/nodes/catalog.ts`
+- `app/src/core/nodes/catalog.ts`
 
 Includes categories for:
 
@@ -105,11 +105,11 @@ Implemented working standalone editor path with:
 
 Key files:
 
-- `apps/src/features/editor/EditorPage.tsx`
-- `apps/src/features/editor/WorkflowCanvas.tsx`
-- `apps/src/features/editor/workflowStore.ts`
-- `apps/src/features/editor/standaloneWorkflowService.ts`
-- `apps/src/features/editor/CompilePreviewDialog.tsx`
+- `app/src/features/editor/EditorPage.tsx`
+- `app/src/features/editor/WorkflowCanvas.tsx`
+- `app/src/features/editor/workflowStore.ts`
+- `app/src/features/editor/standaloneWorkflowService.ts`
+- `app/src/features/editor/CompilePreviewDialog.tsx`
 
 ### 9) UI System + i18n + Hardening
 
@@ -122,32 +122,32 @@ Implemented:
 
 Key files:
 
-- `apps/src/app/styles.css`
-- `apps/src/app/i18n.ts`
-- `apps/vite.config.ts`
+- `app/src/app/styles.css`
+- `app/src/app/i18n.ts`
+- `app/vite.config.ts`
 
 ### 10) CI and Test Coverage
 
 Added standalone CI workflow and scripts:
 
 - `.github/workflows/standalone-ci.yml`
-- root `package.json` scripts (`build:standalone`, `test:standalone`, `ci:standalone`, etc.)
+- root `package.json` scripts (`build:app`, `test:app`, `ci:app`, etc.)
 
 Added unit/integration/regression tests, including compiler snapshots:
 
-- `apps/src/core/workflow/serialization.test.ts`
-- `apps/src/core/workflow/integration.test.ts`
-- `apps/src/adapters/persistence/memoryWorkflowRepository.test.ts`
-- `apps/src/core/models/registry.test.ts`
-- `apps/src/core/compiler/pipeline.test.ts`
-- `apps/src/core/nodes/catalog.test.ts`
-- `apps/src/app/App.test.tsx`
+- `app/src/core/workflow/serialization.test.ts`
+- `app/src/core/workflow/integration.test.ts`
+- `app/src/adapters/persistence/memoryWorkflowRepository.test.ts`
+- `app/src/core/models/registry.test.ts`
+- `app/src/core/compiler/pipeline.test.ts`
+- `app/src/core/nodes/catalog.test.ts`
+- `app/src/app/App.test.tsx`
 
 ## Verification Results
 
 The standalone quality gate completed successfully:
 
-- `npm run ci:standalone`
+- `npm run ci:app`
 
 This includes:
 

@@ -1,18 +1,18 @@
-name: Standalone CI
+name: App CI
 
 on:
   pull_request:
     paths:
-      - 'apps/**'
-      - '.github/workflows/standalone-ci.yml'
+      - 'app/**'
+      - '.github/workflows/app-ci.yml'
       - 'package.json'
   push:
     branches:
       - main
       - production
     paths:
-      - 'apps/**'
-      - '.github/workflows/standalone-ci.yml'
+      - 'app/**'
+      - '.github/workflows/app-ci.yml'
       - 'package.json'
 
 jobs:
@@ -28,14 +28,14 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
-            apps/package-lock.json
+            app/package-lock.json
 
       - name: Install root deps
         run: npm ci
 
-      - name: Install standalone deps
-        working-directory: apps/standalone
+      - name: Install app deps
+        working-directory: app
         run: npm ci
 
-      - name: Run standalone checks
-        run: npm run ci:standalone
+      - name: Run app checks
+        run: npm run ci:app

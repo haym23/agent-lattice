@@ -159,7 +159,7 @@ Example:
   "data": {
     "questionText": "Which migration strategy should we use?",
     "options": [
-      { "label": "Parallel app", "description": "Build in apps/standalone" },
+      { "label": "Parallel app", "description": "Build in app" },
       { "label": "In-place", "description": "Modify existing runtime" }
     ],
     "outputPorts": 2

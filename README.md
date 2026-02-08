@@ -1,5 +1,116 @@
 # Agent Lattice
 
+---
+
+# Agent Lattice README
+
+## Directory Structure
+
+```
+src/
+├ adapters/
+├ app
+├ core/
+|   ├ compiler/
+|   ├ ir/
+|   ├ llm/
+|   ├ models/
+|   ├ nodes/
+|   ├ prompts/
+|   | ├ registry.ts
+|   | ├   types.ts
+|   | └ templates
+|   |   ├ llm-write-v1.ts
+|   |   ├ llm-classify-v1.ts
+|   |   └ repair.ts
+|   ├ runtime/
+|   └ workflow/
+├ features/
+└ services/
+```
+
+---
+
+## Section Description
+
+### `adapters`
+
+### `app`
+
+Core scaffolding of the UI. React app entry point and routes defined here. i18n also defined here (language translations).
+
+### `core`
+
+This section defines the core functionality of the runtime environment. This is where prompting gets compiled from block data to prompts.
+
+Block Data -> IR stages -> Prompt Template Injection
+
+#### `ir`
+
+IR stands for "Intermediate Representation" and defines the data structures used by a compiler to represent source code. In our case, the ExecIR is the lowest level of data structure that will be used, this is the last convertable unit before prompt template generation.
+
+#### `llm`
+
+#### `models`
+
+#### `nodes`
+
+Nodes are the smallest units that can be used in workflows. This directory gives a catalog of all of the different node types that are used during prompt compilation.
+
+##### `prompts`
+
+Prompts are broken down into templates that the compiler is able to read and inject. This is where the matching for prompts takes place.
+
+**Current templates include:**
+
+- llm-write-v1
+- llm-classify-v1
+- repair
+
+##### `runtime`
+
+#### `workflow`
+
+### `features`
+
+UI features for the main site. Includes all React UI content. Routes for features defined in [`app`](#app).
+
+#### `dashboard`
+
+#### `editor`
+
+#### `settings`
+
+#### `shared`
+
+#### `templates`
+
+### `services`
+
+---
+
+## Notes
+
+### Use Cases
+
+- Developer: Well structured workflows could replace APIs. Run cheap models with lots of validation and coverage and you have replaced the need for a backend API
+- Busy Mom: Organize dinner plans between family. Send a text in the morning, family deliberates, short summary and shopping list is ready for when mom goes to grocery store after work.
+- Young Professional: A busy employee takes a call while driving to meet a customer. The entire meeting is summarized and waiting in his notes by the time he is back to the office.
+- Developer: Come in Monday morning, have a flow to summarize Jira tasks for the sprint and give suggested solution. Using a series of templates and AI tools, you make workflows for each task in just a few hours. Once workflows are approved they can be run and you can have PRs ready by the time you're back from lunch
+- Fantasy Diehard: You love fantasy football, but live a busy life and don't have time to check all the news. Automatically get NFL news from RSS feeds, then place waiver claims through Sleeper API. You also get automated trade ideas based on team and player news.
+
+### Good MCPs
+
+- **Google Maps, Gmail, Calendar, etc:** Connect to any Google app
+- **Reddit:** Search through Reddit quickly for ideas
+- **Sleeper:** Fantasy football
+- **Context7:** Code formatting and standards
+
+---
+---
+
+# Claude Code Workflow Studio (Deprecated)
+
 <p align="center">
   <a href="https://github.com/haym23/agent-lattice/stargazers"><img src="https://img.shields.io/github/stars/haym23/agent-lattice" alt="GitHub Stars" /></a>
   <a href="https://snyk.io/test/github/haym23/agent-lattice"><img src="https://snyk.io/test/github/haym23/agent-lattice/badge.svg" alt="Known Vulnerabilities" /></a>
@@ -18,9 +129,6 @@
 <p align="center">
   Design complex AI agent workflows by conversing with AI – or use intuitive drag-and-drop. Build Sub-Agent orchestrations and conditional branching with natural language, then export directly to <code>.claude</code> format.
 </p>
-
-<!-- Hero image placeholder - recommended size: 1600x900px or 16:9 aspect ratio -->
-<!-- Place image at: /resources/hero.png -->
 
 ---
 
@@ -105,10 +213,6 @@
 
 - Click Edit with AI <img src="./resources/icon-sparkles.png" alt="sparkles" height="16" style="vertical-align: middle"> button in the toolbar to generate or refine workflows with natural language
 
-## Usage Examples
-
-Coming soon - Sample workflows and tutorials are under development.
-
 ## License
 
 This project is licensed under the **GNU Affero General Public License v3.0** (AGPL-3.0-or-later).
@@ -134,31 +238,3 @@ Copyright (c) 2025 breaking-brake
 Built with [React Flow](https://reactflow.dev/) • Powered by [Claude Code](https://claude.com/claude-code) • Inspired by [Dify](https://dify.ai/)
 
 ---
----
-
-# Agent Lattice README
-
-## Directory Structure
-
-### Compiler
-
-#### Prompt Handling
-```
-src/core/prompts
-│   registry.ts
-│   types.ts
-└─ templates
-    │   llm-write-v1.ts
-    │   llm-classify-v1.ts
-    └─ repair.ts
-```
-
-## Notes
-
-### Use Cases
-
-- Developer: Well structured workflows could replace APIs. Run cheap models with lots of validation and coverage and you have replaced the need for a backend API
-- Busy Mom: Organize dinner plans between family. Send a text in the morning, family deliberates, short summary and shopping list is ready for when mom goes to grocery store after work.
-- Young Professional: A busy employee takes a call while driving to meet a customer. The entire meeting is summarized and waiting in his notes by the time he is back to the office.
-- Developer: Come in Monday morning, have a flow to summarize Jira tasks for the sprint and give suggested solution. Using a series of templates and AI tools, you make workflows for each task in just a few hours. Once workflows are approved they can be run and you can have PRs ready by the time you're back from lunch
-- Fantasy Diehard: You love fantasy football, but live a busy life and don't have time to check all the news. Automatically get NFL news from RSS feeds, then place waiver claims through Sleeper API. You also get automated trade ideas based on team and player news.
