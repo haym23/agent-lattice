@@ -1,3 +1,0 @@
-- 2026-02-08: Lowering pipeline now compiles `WorkflowDocument` into `ExecProgram` via registry-based lowerers in `apps/src/core/compiler/lower/index.ts`.
-- 2026-02-08: Runtime graph walk uses explicit edge-based execution (not precomputed order), with `SWITCH` branch filtering and join gating by incoming predecessor completion in `apps/src/core/runtime/runner.ts`.
-- 2026-02-08: Execution integration path is now `WebPlatformAdapter.executeWorkflow()` -> `lowerToExecIR()` -> `createRunner()` -> runtime events fanout to UI listeners in `apps/src/services/web-adapter.ts`.

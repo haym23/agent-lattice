@@ -31,3 +31,6 @@ npm-debug.log*
 # Temporary files
 *.tmp
 *.swp
+
+# Coding Agents
+.sisyphus/

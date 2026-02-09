@@ -1,1 +1,0 @@
-- 2026-02-08: No unresolved blockers at task completion. Remaining risk: real OpenAI API-key runtime path is implemented but not exercised against a live key in this session.
