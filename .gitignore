@@ -6,6 +6,7 @@ out/
 dist/
 *.vsix
 __snapshots__/
+.turbo/
 
 # Generated files
 *.generated.ts
