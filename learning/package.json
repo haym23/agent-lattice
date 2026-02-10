@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "pages:setup": "sh -c 'git worktree remove --force /tmp/gh-pages >/dev/null 2>&1 || true; git worktree prune; rm -rf /tmp/gh-pages; git worktree add --force --checkout /tmp/gh-pages gh-pages'",
+    "pages:sync": "rsync -a --delete --exclude .git dist/ /tmp/gh-pages/",
+    "pages:deploy": "npm run build && npm run pages:sync && cd /tmp/gh-pages && git add . && git commit -m \"Publish learning build\" && git push origin gh-pages"
   },
   "dependencies": {
     "react": "^18.3.1",
