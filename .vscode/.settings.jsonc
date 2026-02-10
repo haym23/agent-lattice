@@ -15,7 +15,6 @@
   "biome.lspBin": "./node_modules/.bin/biome",
   "biome.enable": true,
 
-
   // File Settings
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,

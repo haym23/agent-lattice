@@ -9,8 +9,7 @@
 
   // 保存時の自動アクション
   "editor.codeActionsOnSave": {
-    "quickfix.biome": "explicit",
-    "source.organizeImports.biome": "explicit"
+    "source.fixAll.biome": "explicit"
   },
 
   // 言語別のデフォルトフォーマッター設定

@@ -74,13 +74,13 @@ Shared code between apps.
 
 Critical logical layer of the Agent Lattice framework. This is the transformation pipeline that converts the visual workflow to low-level execution plans (IR). UI calls the `compileWorkflow` function to begin compilation. Contains the following components:
 
-[**`analyzer`:**](app/src/core/compiler/analyzer.test.ts) is for checking logical flow between blocks. It sorts nodes, ensures valid node/edge connections, and verifies no infinite loops.
+[**`analyzer`:**](packages/compiler/analyzer.test.ts) is for checking logical flow between blocks. It sorts nodes, ensures valid node/edge connections, and verifies no infinite loops.
 
-[**`pipeline`:**](app/src/core/compiler/pipeline.ts) takes the validated block config and preps it for conversion to IR.
+[**`pipeline`:**](packages/compiler/pipeline.ts) takes the validated block config and preps it for conversion to IR.
 
-[**`lower`:**](app/src/core/compiler/lower/) This is where the transformation to IR takes place. Nodes are mapped to operations and assigned a prompt template. It adds validation and test where applicable (as defined by the block). From sorted nodes -> fragments -> executable IR.
+[**`lower`:**](packages/compiler/lower/) This is where the transformation to IR takes place. Nodes are mapped to operations and assigned a prompt template. It adds validation and test where applicable (as defined by the block). From sorted nodes -> fragments -> executable IR.
 
-[**`emitters`**](app/src/core/compiler/emitters/): Outputs compiled results to different ingestion types. Includes outputs for Claude, OpenAI, and JSON.
+[**`emitters`**](packages/compiler/emitters/): Outputs compiled results to different ingestion types. Includes outputs for Claude, OpenAI, and JSON.
 
 #### `ir`
 
@@ -110,23 +110,23 @@ Prompts are broken down into templates that the compiler is able to read and inj
 
 ##### `runtime`
 
-Internal components that make up the execution of the runtime engine. This is the heart of the Agent Lattice framework. This takes the output of the compiler and converts to our LLM "bytecode" (prompt). The output from the compiler is expected as a [`ExecProgram`](app/src/core/ir/types.ts#L141), our IR format.
+Internal components that make up the execution of the runtime engine. This is the heart of the Agent Lattice framework. This takes the output of the compiler and converts to our LLM "bytecode" (prompt). The output from the compiler is expected as a [`ExecProgram`](packages/ir/types.ts#L141), our IR format.
 
 Made up of:
 
-- [`escalation-engine.ts`](app/src/core/runtime/escalation-engine.ts)
-- [`prompt-compiler.ts`](app/src/core/runtime/prompt-compiler.ts)
+- [`escalation-engine.ts`](packages/runtime/escalation-engine.ts)
+- [`prompt-compiler.ts`](packages/runtime/prompt-compiler.ts)
   - Generates final prompt to be sent to LLM
   - Replaces {{placeholders}} with actual values
   - Applies projections to fields
   - Resolves state references to actual values
-- [`repair-engine.ts`](app/src/core/runtime/repair-engine.ts)
+- [`repair-engine.ts`](packages/runtime/repair-engine.ts)
   - Build in retry policy
-- [`runner.ts`](app/src/core/runtime/runner.ts)
+- [`runner.ts`](packages/runtime/runner.ts)
   - Responsible for ingesting compiler output
   - Orchestrates 
   - Executes the IR
-- [`state-store.ts`](app/src/core/runtime/state-store.ts)
+- [`state-store.ts`](packages/runtime/state-store.ts)
   - Manages variables across the workflow
   - Accessed by `prompt-compiler` during prompt generation
   - Made up of four namespaces
@@ -179,6 +179,22 @@ UI features for the main site. Includes all React UI content. Routes for feature
 
 ---
 
+## Resources
+- [Vercel AI SDK](https://ai-sdk.dev/)
+  - For streaming LLM events as they happen
+  - Used in workflow tracking and debugging
+- [CC Workflow Studio](https://breaking-brake.com/)
+  - Inspiration behind block-based prompt building
+  - Forked repo to begin Agent Lattice
+
+---
+
+## Stack
+- Typescript
+- UI: Vite React
+- Linter: Biome
+- Package Manager: pnpm
+
 ## Inspirations
 
 - [n8n](https://n8n.io/): Visual workflow building
@@ -187,6 +203,7 @@ UI features for the main site. Includes all React UI content. Routes for feature
 - [Temporal](https://temporal.io/): Workflow tracking and state resiliance
 - [CrewAi](https://www.crewai.com/open-source): Multi-agent orchestration framework
 
+---
 ---
 ---
 

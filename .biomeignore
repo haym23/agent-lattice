@@ -1,7 +1,8 @@
-dist
-build
-.turbo
-node_modules
-.next
-coverage
-*.min.js
+**/dist
+**/build
+**/out
+**/.turbo
+**/node_modules
+**/.next
+**/coverage
+**/*.min.js

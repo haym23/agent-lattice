@@ -1,10 +1,10 @@
-import type { EndExecNode } from "@lattice/ir";
-import type { Lowerer } from "../types";
+import type { EndExecNode } from "@lattice/ir"
+import type { Lowerer } from "../types"
 
 export const endLowerer: Lowerer = {
-	nodeType: "end",
-	lower(node) {
-		const execNode: EndExecNode = { id: node.id, op: "END" };
-		return { nodes: [execNode], edges: [], requiredTemplates: [] };
-	},
-};
+  nodeType: "end",
+  lower(node) {
+    const execNode: EndExecNode = { id: node.id, op: "END" }
+    return { nodes: [execNode], edges: [], requiredTemplates: [] }
+  },
+}

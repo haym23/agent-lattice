@@ -1,7 +1,7 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react"
+import { defineConfig } from "vite"
 
-const repoBase = "/agent-lattice/";
+const repoBase = "/agent-lattice/"
 
 export default defineConfig({
   base: repoBase,
@@ -10,4 +10,4 @@ export default defineConfig({
     outDir: "dist",
     emptyOutDir: true,
   },
-});
+})

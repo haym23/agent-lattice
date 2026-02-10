@@ -1,31 +1,51 @@
+import type { ExecutionEvent } from "@lattice/runtime"
+
 interface ModelCallsLogProps {
-	calls: Array<{ model: string; prompt: string; response: string }>;
+  events: ExecutionEvent[]
 }
 
 /**
  * Executes model calls log.
  */
-export function ModelCallsLog({ calls }: ModelCallsLogProps): JSX.Element {
-	return (
-		<section>
-			<h4 style={{ margin: "0 0 8px" }}>Model Calls</h4>
-			<div style={{ maxHeight: 140, overflow: "auto", fontSize: 12 }}>
-				{calls.length === 0 ? (
-					<p style={{ margin: 0, color: "#64748b" }}>No calls yet.</p>
-				) : null}
-				{calls.map((call, index) => (
-					<div
-						key={`${call.model}-${index}`}
-						style={{ borderBottom: "1px solid #e2e8f0", padding: "4px 0" }}
-					>
-						<div>
-							<strong>{call.model}</strong>
-						</div>
-						<div>Prompt: {call.prompt.slice(0, 80)}</div>
-						<div>Response: {call.response.slice(0, 80)}</div>
-					</div>
-				))}
-			</div>
-		</section>
-	);
+export function ModelCallsLog({ events }: ModelCallsLogProps): JSX.Element {
+  const tracked = events.filter((event) => {
+    return (
+      event.type.startsWith("llm.step.") ||
+      event.type.startsWith("tool.") ||
+      event.type === "trace.breadcrumb"
+    )
+  })
+
+  return (
+    <section>
+      <h4 style={{ margin: "0 0 8px" }}>Model and Tool Timeline</h4>
+      <div style={{ maxHeight: 140, overflow: "auto", fontSize: 12 }}>
+        {tracked.length === 0 ? (
+          <p style={{ margin: 0, color: "#64748b" }}>
+            No model or tool events yet.
+          </p>
+        ) : null}
+        {tracked.map((event) => (
+          <div
+            key={`${event.runId}-${event.seq}`}
+            style={{ borderBottom: "1px solid #e2e8f0", padding: "4px 0" }}
+          >
+            <div>
+              <strong>{event.type}</strong>
+            </div>
+            <div>Seq: {event.seq}</div>
+            {event.type === "llm.step.completed" ? (
+              <div>Model: {event.payload.modelUsed}</div>
+            ) : null}
+            {event.type === "tool.called" ? (
+              <div>Tool: {event.payload.toolName}</div>
+            ) : null}
+            {event.type === "trace.breadcrumb" ? (
+              <div>{event.payload.summary}</div>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </section>
+  )
 }

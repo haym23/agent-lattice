@@ -20,8 +20,10 @@
   - [ ] Agents with different models share context, context is as large as necessary
 
 # LatticeBox
-- [ ] Run Lattice on Raspberry Pi with ultra lightweight model (LFM2.5-1.2B)
 - [ ] Run Lattice on Mini PC with pre-loaded models and run like ClawdBot
+# MicroLattice
+- [ ] Run Lattice on Raspberry Pi with ultra lightweight models (LFM2.5-1.2B)
+- [ ] Specialize microcontrollers with optimized models 
 
 
 # MVP

@@ -10,20 +10,23 @@
       "default": "./dist/index.js"
     }
   },
-  "scripts": {
-    "dev": "tsc -p tsconfig.json -w",
-    "build": "tsc -p tsconfig.json",
-    "lint": "echo 'No linter configured'",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
-  },
   "dependencies": {
     "@lattice/ir": "workspace:*",
     "@lattice/llm": "workspace:*",
+    "@lattice/prompts": "workspace:*",
     "ajv": "^8.17.1",
     "jmespath": "^0.16.0"
   },
   "devDependencies": {
     "@types/jmespath": "^0.15.2",
+    "vitest": "^4.0.16",
     "typescript": "^5.5.0"
+  },
+  "scripts": {
+    "dev": "tsc -p tsconfig.json -w",
+    "build": "tsc -p tsconfig.json",
+    "lint": "echo 'No linter configured'",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
   }
 }
