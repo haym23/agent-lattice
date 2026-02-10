@@ -24,10 +24,11 @@ Whether its learning a new hobby or becoming a rockstar at work, your solution i
 ## Directory Structure
 
 ```
-src/
-├ adapters/
-├ app
-├ core/
+apps/
+|   ├ web/
+|   ├ server/
+|   └ worker/
+packages/
 |   ├ compiler/
 |   |   ├ analyzer.ts
 |   |   ├ pipeline.ts
@@ -46,8 +47,7 @@ src/
 |   |     └ repair.ts
 |   ├ runtime/
 |   └ workflow/
-├ features/
-└ services/
+
 ```
 
 ---
@@ -56,15 +56,19 @@ src/
 
 ### `adapters`
 
-### `app`
+### `apps`
 
-Core scaffolding of the UI. React app entry point and routes defined here. i18n also defined here (language translations).
+Main containerized applications live here
 
-### `core`
+### `web`
 
-This section defines the core functionality of the runtime environment. This is where prompting gets compiled from block data to prompts.
+The UI of the site. Handles workflow creation through connected blocks.
 
 Block Data -> IR stages -> Prompt Template Injection
+
+### `packages`
+
+Shared code between apps.
 
 #### `compiler`
 
