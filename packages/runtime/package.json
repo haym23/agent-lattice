@@ -18,6 +18,7 @@
     "jmespath": "^0.16.0"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.18",
     "@types/jmespath": "^0.15.2",
     "vitest": "^4.0.16",
     "typescript": "^5.5.0"
@@ -27,6 +28,7 @@
     "build": "tsc -p tsconfig.json",
     "lint": "echo 'No linter configured'",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
   }
 }

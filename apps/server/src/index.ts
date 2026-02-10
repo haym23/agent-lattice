@@ -6,6 +6,7 @@ const host = process.env.HOST ?? "0.0.0.0"
 const app = createServerApp()
 
 app.listen({ port, host }).catch((error) => {
-  app.log.error(error)
+  console.error("Failed to start @lattice/server")
+  console.error(error)
   process.exit(1)
 })
