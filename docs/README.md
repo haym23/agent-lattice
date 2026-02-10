@@ -174,6 +174,16 @@ UI features for the main site. Includes all React UI content. Routes for feature
 - **Context7:** Code formatting and standards
 
 ---
+
+## Inspirations
+
+- [n8n](https://n8n.io/): Visual workflow building
+- [Scratch](https://scratch.mit.edu/): Block semantics
+- [LangChain/LangGraph](https://www.langchain.com/langgraph): LLM primitives and linking
+- [Temporal](https://temporal.io/): Workflow tracking and state resiliance
+- [CrewAi](https://www.crewai.com/open-source): Multi-agent orchestration framework
+
+---
 ---
 
 # Claude Code Workflow Studio (Deprecated)
