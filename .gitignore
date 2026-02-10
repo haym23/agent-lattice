@@ -5,6 +5,7 @@ node_modules/
 out/
 dist/
 *.vsix
+__snapshots__/
 
 # Generated files
 *.generated.ts
