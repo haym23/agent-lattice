@@ -14,7 +14,7 @@
     "format": "biome format .",
     "check": "biome check .",
     "fix": "biome check . --write",
-    "typecheck": "pnpm -r typecheck",
+    "typecheck": "pnpm -r --filter './packages/**' build && pnpm -r typecheck",
     "test": "pnpm -r test",
     "coverage": "pnpm -r --if-present test:coverage",
     "ci": "pnpm run check && pnpm run typecheck && pnpm run coverage",
