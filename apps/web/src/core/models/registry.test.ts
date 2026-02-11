@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest"
-
-import { ModelRegistry, validateModelDefinition } from "./registry"
 import claudeIcon from "./icons/claude.svg"
 import openAiIcon from "./icons/openai.svg"
+import { ModelRegistry, validateModelDefinition } from "./registry"
 
 describe("ModelRegistry", () => {
   it("contains Claude and GPT-4o", () => {

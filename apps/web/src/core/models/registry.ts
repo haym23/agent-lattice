@@ -38,7 +38,7 @@ const builtInModels: ModelDefinition[] = [
  * Provides model registry behavior.
  */
 export class ModelRegistry {
-  constructor(private readonly models: ModelDefinition[] = builtInModels) { }
+  constructor(private readonly models: ModelDefinition[] = builtInModels) {}
 
   list(): ModelDefinition[] {
     return [...this.models]
