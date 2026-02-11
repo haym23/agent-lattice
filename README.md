@@ -11,7 +11,9 @@
   <a href="https://open-vsx.org/extension/haym23/agent-lattice"><img src="https://img.shields.io/open-vsx/v/haym23/agent-lattice?label=OpenVSX" alt="OpenVSX" /></a>
   <a href="https://deepwiki.com/haym23/agent-lattice"><img src="https://img.shields.io/badge/Ask-DeepWiki-009485" alt="Ask DeepWiki" /></a>
 </p>
+
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![Node.js: >=20](https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 
 ## Overview
 
