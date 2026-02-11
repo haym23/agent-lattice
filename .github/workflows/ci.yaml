@@ -15,6 +15,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run ci
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         with:
+          fail_ci_if_error: true
           files: ./apps/**/coverage/lcov.info,./packages/**/coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
