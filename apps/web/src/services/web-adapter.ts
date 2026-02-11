@@ -99,7 +99,7 @@ export class WebPlatformAdapter implements PlatformAdapter {
         readServerBaseUrlFromEnv() ??
         "http://localhost:8787"
     )
-    this.fetchImpl = options.fetchImpl ?? fetch
+    this.fetchImpl = options.fetchImpl ?? globalThis.fetch.bind(globalThis)
     this.eventSourceFactory =
       options.eventSourceFactory ?? createDefaultEventSource
   }

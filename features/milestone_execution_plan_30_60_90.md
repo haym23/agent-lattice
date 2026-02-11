@@ -34,19 +34,19 @@ Done when:
 Owner: Backend/Infra  
 Priority: P0
 
-- [ ] Select storage backend (SQLite local-first or Postgres shared env).
-- [ ] Define schema for run events (`runId`, `seq`, `timestamp`, `type`, `payload`, redaction metadata).
-- [ ] Add indexes for replay-critical queries (`runId`, `seq`, `timestamp`).
-- [ ] Persist each emitted event before SSE fan-out.
-- [ ] Implement replay query (`seq > lastSeq ORDER BY seq ASC`).
-- [ ] Add run metadata persistence (`status`, `startedAt`, `endedAt`, `error`).
-- [ ] Implement restart-time recovery for replay and run lookup.
-- [ ] Add retention policy and pruning job for stale events.
+- [x] Select storage backend (SQLite local-first or Postgres shared env).
+- [x] Define schema for run events (`runId`, `seq`, `timestamp`, `type`, `payload`, redaction metadata).
+- [x] Add indexes for replay-critical queries (`runId`, `seq`, `timestamp`).
+- [x] Persist each emitted event before SSE fan-out.
+- [x] Implement replay query (`seq > lastSeq ORDER BY seq ASC`).
+- [x] Add run metadata persistence (`status`, `startedAt`, `endedAt`, `error`).
+- [x] Implement restart-time recovery for replay and run lookup.
+- [x] Add retention policy and pruning job for stale events.
 
 Done when:
 
-- [ ] Server restart does not break replay continuity.
-- [ ] Reconnect from `lastSeq` replays deterministically.
+- [x] Server restart does not break replay continuity.
+- [x] Reconnect from `lastSeq` replays deterministically.
 
 ---
 
@@ -74,12 +74,8 @@ Done when:
 Owner: Web/Frontend  
 Priority: P0
 
-- [ ] Define persistence semantics: `Save` updates existing ID; `Save As` creates new ID.
-- [ ] Add workflow name normalization and collision handling rules.
-- [ ] Clarify action controls (`Save`, `Save As`, `Refresh`, `Load`) and helper text.
-- [ ] Add visible status states (`dirty`, `saving`, `saved`, `load failed`).
+- [ ] Add visible status states (`changed`, `saving`, `saved`, `load failed`).
 - [ ] Prevent duplicate entries in workflow list.
-- [ ] Ensure `Refresh` and `Load` semantics are explicit and non-overlapping.
 - [ ] Add tests for duplicate prevention, stale list refresh, selected workflow load behavior.
 
 Done when:

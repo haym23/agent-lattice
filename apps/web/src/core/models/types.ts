@@ -10,7 +10,7 @@ export interface ModelDefinition {
   id: string
   displayName: string
   provider: string
-  logoText: string
+  icon: string
   preview: string
   capabilities: ModelCapabilities
 }

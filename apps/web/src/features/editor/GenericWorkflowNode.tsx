@@ -22,6 +22,14 @@ export function GenericWorkflowNode({
   const executionStatus = String(
     (data as Record<string, unknown> | undefined)?.executionStatus ?? ""
   ) as "running" | "completed" | "failed" | ""
+  const statusLabel =
+    executionStatus === "running"
+      ? "Running"
+      : executionStatus === "completed"
+        ? "Completed"
+        : executionStatus === "failed"
+          ? "Failed"
+          : ""
   const iconSrc = isWorkflowNodeType(type) ? getNodeTypeIcon(type) : null
   const nodeDescription = isWorkflowNodeType(type)
     ? getNodeDefinition(type).description
@@ -30,50 +38,40 @@ export function GenericWorkflowNode({
   const hasOutput = type !== "end"
   const ports =
     Number.isFinite(outputPorts) && outputPorts > 0 ? outputPorts : 1
-  const executionBorderColor =
-    executionStatus === "running"
-      ? "#ca8a04"
-      : executionStatus === "completed"
-        ? "#16a34a"
-        : executionStatus === "failed"
-          ? "#dc2626"
-          : null
+  const nodeClassName = [
+    "workflow-node",
+    selected ? "workflow-node--selected" : "",
+    executionStatus ? `workflow-node--${executionStatus}` : "",
+  ]
+    .filter(Boolean)
+    .join(" ")
 
   return (
-    <div
-      className={
-        executionStatus === "running"
-          ? "workflow-node workflow-node--running"
-          : "workflow-node"
-      }
-      style={{
-        minWidth: 180,
-        maxWidth: 220,
-        border: selected
-          ? "2px solid #2563eb"
-          : executionBorderColor
-            ? `2px solid ${executionBorderColor}`
-            : "1px solid #94a3b8",
-        borderRadius: 10,
-        background: "#ffffff",
-        padding: 10,
-        boxShadow:
-          executionStatus === "running"
-            ? "0 0 0 2px rgba(202, 138, 4, 0.2)"
-            : selected
-              ? "0 6px 18px rgba(37, 99, 235, 0.18)"
-              : "0 2px 10px rgba(15, 23, 42, 0.08)",
-        transition: "transform 160ms ease, box-shadow 160ms ease",
-        transform: selected ? "translateY(-1px)" : "translateY(0)",
-      }}
-    >
+    <div className={nodeClassName} data-status={executionStatus || "idle"}>
       {hasInput ? (
         <Handle id="input" type="target" position={Position.Left} />
       ) : null}
-      <div style={{ fontSize: 11, color: "#475569", marginBottom: 4 }}>
-        {type}
+      <div className="workflow-node-meta-row">
+        <div className="workflow-node-type">{type}</div>
+        {executionStatus ? (
+          <div
+            className={`workflow-node-status workflow-node-status--${executionStatus}`}
+            aria-label={`Node ${statusLabel}`}
+            title={statusLabel}
+          >
+            {executionStatus === "running" ? (
+              <span className="workflow-node-spinner" aria-hidden="true" />
+            ) : null}
+            {executionStatus === "completed" ? (
+              <span className="workflow-node-check" aria-hidden="true" />
+            ) : null}
+            {executionStatus === "failed" ? (
+              <span className="workflow-node-fail" aria-hidden="true" />
+            ) : null}
+          </div>
+        ) : null}
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div className="workflow-node-title-row">
         {iconSrc ? (
           <img
             src={iconSrc}
@@ -81,23 +79,14 @@ export function GenericWorkflowNode({
             aria-hidden="true"
             width={18}
             height={18}
-            style={{ flexShrink: 0 }}
+            className="workflow-node-icon"
           />
         ) : null}
-        <div style={{ fontWeight: 600, color: "#0f172a" }}>{label}</div>
+        <div className="workflow-node-title">{label}</div>
       </div>
-      <div style={{ fontSize: 11, color: "#64748b", marginTop: 6 }}>{id}</div>
+      <div className="workflow-node-id">{id}</div>
       {nodeDescription ? (
-        <div
-          style={{
-            fontSize: 11,
-            lineHeight: 1.35,
-            color: "#475569",
-            marginTop: 6,
-          }}
-        >
-          {nodeDescription}
-        </div>
+        <div className="workflow-node-description">{nodeDescription}</div>
       ) : null}
       {hasOutput
         ? Array.from({ length: ports }, (_, index) => {

@@ -2,6 +2,7 @@ import ReactFlow, {
   Background,
   Controls,
   MiniMap,
+  type NodeMouseHandler,
   type NodeTypes,
 } from "reactflow"
 
@@ -14,6 +15,7 @@ import "reactflow/dist/style.css"
 
 interface WorkflowCanvasProps {
   searchTerm: string
+  onNodeSelect?: () => void
 }
 
 const nodeTypes: NodeTypes = Object.fromEntries(
@@ -25,10 +27,15 @@ const nodeTypes: NodeTypes = Object.fromEntries(
  */
 export function WorkflowCanvas({
   searchTerm,
+  onNodeSelect,
 }: WorkflowCanvasProps): JSX.Element {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onNodeClick } =
     useWorkflowStore()
   const nodeStatuses = useExecutionStore((state) => state.nodeStatuses)
+  const handleNodeClick: NodeMouseHandler = (event, node) => {
+    onNodeClick(event, node)
+    onNodeSelect?.()
+  }
 
   const displayNodes = nodes.map((node) => {
     const label = String(
@@ -68,7 +75,7 @@ export function WorkflowCanvas({
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        onNodeClick={onNodeClick}
+        onNodeClick={handleNodeClick}
         nodeTypes={nodeTypes}
         fitView
       >

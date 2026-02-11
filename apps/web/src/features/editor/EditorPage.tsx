@@ -10,13 +10,14 @@ import { isWorkflowNodeType } from "../../core/workflow/types"
 import { PageShell } from "../shared/PageShell"
 import { CompilePreviewDialog } from "./CompilePreviewDialog"
 import { ExecutionPanel } from "./execution/ExecutionPanel"
+import { useExecutionStore } from "./executionStore"
 import { NodePicker } from "./header/NodePicker"
 import githubMcpIcon from "./icons/nodes/github.svg"
 import googleMcpIcon from "./icons/nodes/google.svg"
 import notionMcpIcon from "./icons/nodes/notion.svg"
 import slackMcpIcon from "./icons/nodes/slack.svg"
-import openAiModelIcon from "./icons/nodes/openai.svg"
 import { getNodeTypeIcon } from "./icons/nodeTypeIconMap"
+import { NodeEditorDialog } from "./NodeEditorDialog"
 import { WorkflowCanvas } from "./WorkflowCanvas"
 import {
   compileForTarget,
@@ -131,11 +132,14 @@ export function EditorPage(): JSX.Element {
   const [isMcpPickerOpen, setIsMcpPickerOpen] = useState(false)
   const [selectedNodeLabel, setSelectedNodeLabel] = useState("")
   const [selectedNodeConfigJson, setSelectedNodeConfigJson] = useState("{}")
+  const [isNodeEditorOpen, setIsNodeEditorOpen] = useState(false)
   const [configError, setConfigError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [lastPersistedSnapshot, setLastPersistedSnapshot] = useState<
     string | null
   >(null)
+  const { startExecution: startExecutionFromToolbar, executionStatus } =
+    useExecutionStore()
 
   const models = listModels()
   const selectedNode = useMemo(
@@ -166,6 +170,7 @@ export function EditorPage(): JSX.Element {
       setSelectedNodeLabel("")
       setSelectedNodeConfigJson("{}")
       setConfigError(null)
+      setIsNodeEditorOpen(false)
       return
     }
 
@@ -259,9 +264,7 @@ export function EditorPage(): JSX.Element {
   }
 
   const handleRunFromToolbar = () => {
-    window.alert(
-      "Server-side run is coming soon. This button will execute the workflow with the selected model."
-    )
+    void startExecutionFromToolbar(workflowName)
   }
 
   const handleAddMcpNode = () => {
@@ -449,22 +452,12 @@ export function EditorPage(): JSX.Element {
                         : "workflow-model-option"
                     }
                   >
-                    {model.provider === "OpenAI" ? (
-                      <img
-                        src={openAiModelIcon}
-                        alt=""
-                        aria-hidden="true"
-                        className="workflow-model-logo workflow-model-logo--image"
-                      />
-                    ) : (
-                      <span
-                        className="workflow-model-logo"
-                        aria-hidden="true"
-                        style={{ backgroundColor: logoBackground }}
-                      >
-                        {model.logoText}
-                      </span>
-                    )}
+                    <img
+                      src={model.icon}
+                      alt=""
+                      aria-hidden="true"
+                      className="workflow-model-logo workflow-model-logo--image"
+                    />
                     <span className="workflow-model-meta">
                       <span className="workflow-model-name">
                         {model.displayName}
@@ -503,9 +496,10 @@ export function EditorPage(): JSX.Element {
                 type="button"
                 onClick={handleRunFromToolbar}
                 aria-label="run-workflow"
+                disabled={executionStatus === "running"}
                 className="workflow-btn workflow-btn--accent"
               >
-                Run
+                {executionStatus === "running" ? "Running..." : "Run"}
               </button>
             </div>
           </section>
@@ -513,85 +507,30 @@ export function EditorPage(): JSX.Element {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns:
-              "minmax(0, 2fr) minmax(280px, 1fr) minmax(280px, 1fr)",
+            gridTemplateColumns: "minmax(0, 2fr) minmax(300px, 1fr)",
             gap: 12,
             alignItems: "start",
           }}
         >
-          <WorkflowCanvas searchTerm="" />
-          <aside className="card" style={{ minHeight: 520 }}>
-            <h3 style={{ marginTop: 0 }}>Node Editor</h3>
-            {!selectedNode ? (
-              <p style={{ color: "#64748b" }}>
-                Click a node on the canvas to edit its settings.
-              </p>
-            ) : (
-              <>
-                <p
-                  style={{ margin: "0 0 8px", color: "#64748b", fontSize: 12 }}
-                >
-                  {selectedNode.type} ({selectedNode.id})
-                </p>
-                {selectedNodeIcon ? (
-                  <img
-                    src={selectedNodeIcon}
-                    alt=""
-                    aria-hidden="true"
-                    width={20}
-                    height={20}
-                    style={{ marginBottom: 8 }}
-                  />
-                ) : null}
-                <label
-                  style={{ display: "block", marginBottom: 6 }}
-                  htmlFor="node-label-input"
-                >
-                  Label
-                </label>
-                <input
-                  id="node-label-input"
-                  value={selectedNodeLabel}
-                  onChange={(event) => setSelectedNodeLabel(event.target.value)}
-                  style={{ width: "100%", marginBottom: 10 }}
-                />
-                <label
-                  style={{ display: "block", marginBottom: 6 }}
-                  htmlFor="node-config-input"
-                >
-                  Config (JSON)
-                </label>
-                <textarea
-                  id="node-config-input"
-                  value={selectedNodeConfigJson}
-                  onChange={(event) =>
-                    setSelectedNodeConfigJson(event.target.value)
-                  }
-                  rows={16}
-                  style={{
-                    width: "100%",
-                    fontFamily:
-                      "ui-monospace, SFMono-Regular, Menlo, monospace",
-                  }}
-                />
-                {configError ? (
-                  <p style={{ color: "#b91c1c", fontSize: 12, marginTop: 8 }}>
-                    {configError}
-                  </p>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={handleApplyNodeChanges}
-                  style={{ marginTop: 10 }}
-                >
-                  Apply Node Changes
-                </button>
-              </>
-            )}
-          </aside>
+          <WorkflowCanvas
+            searchTerm=""
+            onNodeSelect={() => setIsNodeEditorOpen(true)}
+          />
           <ExecutionPanel workflowName={workflowName} />
         </div>
       </section>
+      <NodeEditorDialog
+        open={isNodeEditorOpen}
+        onOpenChange={setIsNodeEditorOpen}
+        selectedNode={selectedNode}
+        selectedNodeIcon={selectedNodeIcon}
+        selectedNodeLabel={selectedNodeLabel}
+        selectedNodeConfigJson={selectedNodeConfigJson}
+        configError={configError}
+        onSelectedNodeLabelChange={setSelectedNodeLabel}
+        onSelectedNodeConfigJsonChange={setSelectedNodeConfigJson}
+        onApplyNodeChanges={handleApplyNodeChanges}
+      />
       <CompilePreviewDialog
         open={isCompileDialogOpen}
         onOpenChange={setIsCompileDialogOpen}

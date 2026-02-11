@@ -14,8 +14,10 @@ describe("ExecutionPanel", () => {
   it("has run and stop controls", () => {
     render(<ExecutionPanel workflowName="test-workflow" />)
     const runButton = screen.getAllByRole("button", { name: "Run" })[0]
+    const clearButton = screen.getAllByRole("button", { name: "Clear" })[0]
     const stopButton = screen.getAllByRole("button", { name: "Stop" })[0]
     expect(runButton.hasAttribute("disabled")).toBe(false)
+    expect(clearButton.hasAttribute("disabled")).toBe(true)
     expect(stopButton.hasAttribute("disabled")).toBe(true)
     fireEvent.click(runButton)
   })

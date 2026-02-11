@@ -14,6 +14,7 @@ import { setPlatformAdapter } from "./workflowService"
 
 const DEFAULT_STATE = {
   executionStatus: "idle" as const,
+  executionError: null,
   currentNodeId: null,
   nodeStatuses: {},
   stateSnapshot: null,
@@ -152,6 +153,12 @@ class SseTestAdapter implements PlatformAdapter {
   }
 }
 
+class FailingAdapter extends SseTestAdapter {
+  override async executeWorkflow(): Promise<ExecutionResult> {
+    throw new Error("Workflow contains unreachable nodes: end")
+  }
+}
+
 describe("executionStore", () => {
   afterEach(() => {
     useExecutionStore.setState(DEFAULT_STATE)
@@ -169,5 +176,26 @@ describe("executionStore", () => {
     expect(state.nodeStatuses.start).toBe("completed")
     expect(state.events.map((event) => event.seq)).toEqual([1, 2, 3, 4])
     expect(state.stateSnapshot?.$vars).toEqual({ completion: true })
+    expect(state.executionError).toBeNull()
+
+    useExecutionStore.getState().clearExecution()
+    const cleared = useExecutionStore.getState()
+    expect(cleared.executionStatus).toBe("idle")
+    expect(cleared.executionError).toBeNull()
+    expect(cleared.currentNodeId).toBeNull()
+    expect(cleared.events).toEqual([])
+    expect(cleared.stateSnapshot).toBeNull()
+  })
+
+  it("surfaces backend error message when execution start fails", async () => {
+    setPlatformAdapter(new FailingAdapter())
+
+    await useExecutionStore.getState().startExecution("broken-workflow")
+
+    const state = useExecutionStore.getState()
+    expect(state.executionStatus).toBe("failed")
+    expect(state.executionError).toBe(
+      "Workflow contains unreachable nodes: end"
+    )
   })
 })

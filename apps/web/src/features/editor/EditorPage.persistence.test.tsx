@@ -12,6 +12,22 @@ import { EditorPage } from "./EditorPage"
 
 const mockSaveCurrentWorkflow = vi.fn()
 const mockLoadStoredWorkflow = vi.fn()
+const mockStartExecution = vi.fn(async () => {})
+
+vi.mock("./executionStore", () => ({
+  useExecutionStore: () => ({
+    executionStatus: "idle",
+    executionError: null,
+    startExecution: mockStartExecution,
+    abort: vi.fn(),
+    stateSnapshot: null,
+    events: [],
+    currentNodeId: null,
+    nodeStatuses: {},
+    modelCalls: [],
+    clearExecution: vi.fn(),
+  }),
+}))
 
 vi.mock("./workflowService", () => ({
   compileForTarget: vi.fn(async () => ({ files: [] })),
@@ -67,6 +83,7 @@ describe("EditorPage persistence controls", () => {
   beforeEach(() => {
     mockSaveCurrentWorkflow.mockReset()
     mockLoadStoredWorkflow.mockReset()
+    mockStartExecution.mockReset()
     mockLoadStoredWorkflow.mockResolvedValue(null)
   })
 
@@ -128,6 +145,17 @@ describe("EditorPage persistence controls", () => {
       expect(mockSaveCurrentWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({ mode: "save" })
       )
+    })
+  })
+
+  it("starts execution from toolbar run action", async () => {
+    renderEditor()
+
+    const run = await screen.findByLabelText("run-workflow")
+    fireEvent.click(run)
+
+    await waitFor(() => {
+      expect(mockStartExecution).toHaveBeenCalledWith("new-workflow")
     })
   })
 })

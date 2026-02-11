@@ -12,6 +12,10 @@ export function createServerApp(
 ): FastifyInstance {
   const app = Fastify({ logger: false })
 
+  app.addHook("onClose", async () => {
+    runManager.stopPruneJob()
+  })
+
   void app.register(cors, {
     origin: true,
   })
@@ -59,6 +63,12 @@ export function createServerApp(
       return reply.status(404).send({ error: "run not found" })
     }
 
+    const requestOrigin = request.headers.origin
+    reply.raw.setHeader(
+      "Access-Control-Allow-Origin",
+      requestOrigin && requestOrigin.length > 0 ? requestOrigin : "*"
+    )
+    reply.raw.setHeader("Vary", "Origin")
     reply.raw.setHeader("Content-Type", "text/event-stream")
     reply.raw.setHeader("Cache-Control", "no-cache")
     reply.raw.setHeader("Connection", "keep-alive")

@@ -153,8 +153,14 @@ describe("server SSE routes", () => {
     const eventsResponse = await app.inject({
       method: "GET",
       url: `/runs/${parsed.runId}/events`,
+      headers: {
+        origin: "http://localhost:5173",
+      },
     })
     expect(eventsResponse.statusCode).toBe(200)
+    expect(eventsResponse.headers["access-control-allow-origin"]).toBe(
+      "http://localhost:5173"
+    )
     const events = parseSsePayload(eventsResponse.payload)
     expect(events.some((event) => event.event === "run.started")).toBe(true)
     expect(

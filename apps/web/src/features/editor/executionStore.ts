@@ -11,6 +11,7 @@ import { useWorkflowStore } from "./workflowStore"
 
 interface ExecutionState {
   executionStatus: ExecutionStatus
+  executionError: string | null
   currentNodeId: string | null
   nodeStatuses: Record<string, NodeExecutionStatus>
   stateSnapshot: StateSnapshot | null
@@ -18,12 +19,14 @@ interface ExecutionState {
   modelCalls: Array<{ model: string; prompt: string; response: string }>
   startExecution: (workflowName: string) => Promise<void>
   abort: () => void
+  clearExecution: () => void
 }
 
 let unsubscribe: (() => void) | null = null
 
 export const useExecutionStore = create<ExecutionState>((set) => ({
   executionStatus: "idle",
+  executionError: null,
   currentNodeId: null,
   nodeStatuses: {},
   stateSnapshot: null,
@@ -45,6 +48,7 @@ export const useExecutionStore = create<ExecutionState>((set) => ({
 
     set({
       executionStatus: "running",
+      executionError: null,
       events: [],
       modelCalls: [],
       currentNodeId: null,
@@ -97,6 +101,10 @@ export const useExecutionStore = create<ExecutionState>((set) => ({
               : event.type === "run.failed"
                 ? "failed"
                 : state.executionStatus,
+          executionError:
+            event.type === "run.failed" && "error" in event.payload
+              ? event.payload.error
+              : state.executionError,
         }
       })
     })
@@ -106,17 +114,35 @@ export const useExecutionStore = create<ExecutionState>((set) => ({
       set((state) => ({
         ...state,
         executionStatus: result.status,
+        executionError:
+          result.status === "failed" ? (result.error?.message ?? null) : null,
         stateSnapshot: result.finalState,
         events:
           state.events.length > 0
             ? state.events
             : [...result.events].sort((left, right) => left.seq - right.seq),
       }))
-    } catch {
-      set((state) => ({ ...state, executionStatus: "failed" }))
+    } catch (error) {
+      set((state) => ({
+        ...state,
+        executionStatus: "failed",
+        executionError:
+          error instanceof Error ? error.message : "Execution failed",
+      }))
     }
   },
   abort() {
-    set({ executionStatus: "cancelled" })
+    set({ executionStatus: "cancelled", executionError: null })
+  },
+  clearExecution() {
+    set({
+      executionStatus: "idle",
+      executionError: null,
+      currentNodeId: null,
+      nodeStatuses: {},
+      stateSnapshot: null,
+      events: [],
+      modelCalls: [],
+    })
   },
 }))

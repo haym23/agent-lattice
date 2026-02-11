@@ -1,11 +1,13 @@
 import type { ModelDefinition } from "./types"
+import claudeModelIcon from "./icons/claude.svg"
+import openAiModelIcon from "./icons/openai.svg"
 
 const builtInModels: ModelDefinition[] = [
   {
     id: "claude-sonnet",
     displayName: "Claude Sonnet",
     provider: "Anthropic",
-    logoText: "A",
+    icon: claudeModelIcon,
     preview: "Balanced reasoning with strong tool and long-context support.",
     capabilities: {
       toolUse: true,
@@ -19,7 +21,7 @@ const builtInModels: ModelDefinition[] = [
     id: "gpt-4o",
     displayName: "GPT-4o",
     provider: "OpenAI",
-    logoText: "O",
+    icon: openAiModelIcon,
     preview:
       "Fast multimodal responses with strong function-calling ergonomics.",
     capabilities: {
@@ -36,7 +38,7 @@ const builtInModels: ModelDefinition[] = [
  * Provides model registry behavior.
  */
 export class ModelRegistry {
-  constructor(private readonly models: ModelDefinition[] = builtInModels) {}
+  constructor(private readonly models: ModelDefinition[] = builtInModels) { }
 
   list(): ModelDefinition[] {
     return [...this.models]

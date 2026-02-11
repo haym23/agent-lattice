@@ -7,7 +7,8 @@ This app provides the backend execution and streaming layer for workflow transpa
 - Hosts a Fastify server for running workflows.
 - Starts workflow runs through an HTTP API.
 - Streams structured execution events over Server-Sent Events (SSE).
-- Supports short in-memory replay on reconnect using sequence-based resume.
+- Persists run metadata + events in a durable SQLite event store (local-first).
+- Supports deterministic replay on reconnect using sequence-based resume.
 - Applies redaction-by-default for UI-facing sensitive payload areas.
 - Includes mapping helpers for converting AI SDK-style events into the shared workflow event model.
 - Uses Vercel AI SDK (`ai` + `@ai-sdk/openai`) for runtime OpenAI model calls.
@@ -77,6 +78,7 @@ The stream includes run/stage/tool/LLM/breadcrumb event types, and redaction met
 - `src/index.ts` - server entrypoint
 - `src/app.ts` - Fastify app and routes
 - `src/run-manager.ts` - run lifecycle, event buffering, subscriber fan-out, SSE framing
+- `src/event-store.ts` - event store contract, in-memory adapter, SQLite durable adapter
 - `src/ai-sdk-event-mapper.ts` - adapter layer for mapping AI SDK-style events into unified events
 
 ## Scripts
@@ -91,6 +93,6 @@ Both `dev` and `start` use Node `--env-file=.env`, so variables in `apps/server/
 
 ## Current scope and boundaries (v1)
 
-- Uses in-memory buffering only (no durable event store yet).
+- Defaults to a local SQLite event store (`.lattice/run-events.sqlite`), with optional in-memory backend for tests/dev.
 - Internal/dev-oriented API surface (no production auth stack yet).
 - Focused on correctness and event transparency for runtime and web consumers.

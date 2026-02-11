@@ -1,13 +1,19 @@
 import { lowerToExecIR } from "@lattice/compiler"
 import type { LlmProvider } from "@lattice/llm"
-import type { ExecutionEvent } from "@lattice/runtime"
+import type {
+  ExecutionEvent,
+  LlmStepCompletedPayload,
+  LlmStepFailedPayload,
+  LlmStepStartedPayload,
+  RunFailedPayload,
+} from "@lattice/runtime"
 import { createRunner, serializeStreamEvent } from "@lattice/runtime"
 import {
   type AiSdkEvent,
   createAiSdkEventMapper,
 } from "./ai-sdk-event-mapper.js"
 import {
-  InMemoryRunEventStore,
+  createRunEventStoreFromEnv,
   type RunEventStore,
   type RunStatus,
 } from "./event-store.js"
@@ -19,6 +25,8 @@ import {
 interface RunManagerOptions {
   providerFactory?: LlmProviderFactory
   eventStore?: RunEventStore
+  retentionMs?: number
+  pruneIntervalMs?: number
 }
 
 interface WorkflowRunRequest {
@@ -38,10 +46,60 @@ export class RunManager {
   private readonly runs = new Map<string, RunRecord>()
   private readonly providerFactory: LlmProviderFactory
   private readonly eventStore: RunEventStore
+  private readonly retentionMs: number
+  private readonly pruneIntervalMs: number
+  private pruneTimer: NodeJS.Timeout | null = null
 
   constructor(options: RunManagerOptions = {}) {
     this.providerFactory = options.providerFactory ?? createProviderFromEnv
-    this.eventStore = options.eventStore ?? new InMemoryRunEventStore()
+    this.eventStore = options.eventStore ?? createRunEventStoreFromEnv()
+    this.retentionMs =
+      options.retentionMs ??
+      Number.parseInt(
+        process.env.LATTICE_EVENT_RETENTION_MS ??
+          String(14 * 24 * 60 * 60 * 1000),
+        10
+      )
+    this.pruneIntervalMs =
+      options.pruneIntervalMs ??
+      Number.parseInt(
+        process.env.LATTICE_EVENT_PRUNE_INTERVAL_MS ?? String(5 * 60 * 1000),
+        10
+      )
+
+    if (Number.isFinite(this.pruneIntervalMs) && this.pruneIntervalMs > 0) {
+      this.pruneTimer = setInterval(() => {
+        void this.pruneEvents()
+      }, this.pruneIntervalMs)
+      this.pruneTimer.unref()
+    }
+  }
+
+  async pruneEvents(): Promise<void> {
+    if (!Number.isFinite(this.retentionMs) || this.retentionMs <= 0) {
+      return
+    }
+
+    const cutoffTimestamp = new Date(
+      Date.now() - this.retentionMs
+    ).toISOString()
+    const prunedCount = await this.eventStore.pruneStaleRuns(cutoffTimestamp)
+    if (prunedCount === 0) {
+      return
+    }
+
+    for (const [runId, run] of this.runs.entries()) {
+      if (run.status !== "running") {
+        this.runs.delete(runId)
+      }
+    }
+  }
+
+  stopPruneJob(): void {
+    if (this.pruneTimer) {
+      clearInterval(this.pruneTimer)
+      this.pruneTimer = null
+    }
   }
 
   private createRunnerWithProvider(): ReturnType<typeof createRunner> {
@@ -72,11 +130,19 @@ export class RunManager {
 
         if (event.type === "run.completed") {
           run.status = "completed"
-          await this.eventStore.updateRunStatus(runId, "completed")
+          await this.eventStore.updateRunStatus(runId, {
+            status: "completed",
+            endedAt: event.timestamp,
+          })
         }
         if (event.type === "run.failed") {
+          const payload = event.payload as RunFailedPayload
           run.status = "failed"
-          await this.eventStore.updateRunStatus(runId, "failed")
+          await this.eventStore.updateRunStatus(runId, {
+            status: "failed",
+            endedAt: event.timestamp,
+            error: payload.error,
+          })
         }
 
         for (const listener of run.listeners) {
@@ -98,7 +164,11 @@ export class RunManager {
         }
         await this.eventStore.appendEvent(terminalEvent)
         run.lastPersistedSeq = terminalEvent.seq
-        await this.eventStore.updateRunStatus(runId, "failed")
+        await this.eventStore.updateRunStatus(runId, {
+          status: "failed",
+          endedAt: terminalEvent.timestamp,
+          error: (terminalEvent.payload as RunFailedPayload).error,
+        })
         for (const listener of run.listeners) {
           listener(terminalEvent)
         }
@@ -110,11 +180,12 @@ export class RunManager {
     mapAiSdkEvent: (event: AiSdkEvent) => ExecutionEvent
   ): ExecutionEvent {
     if (event.type === "llm.step.started") {
+      const payload = event.payload as LlmStepStartedPayload
       const mapped = mapAiSdkEvent({
         type: "step-start",
-        stageId: event.payload.stageId,
-        modelClass: event.payload.modelClass,
-        prompt: event.payload.prompt.value,
+        stageId: payload.stageId,
+        modelClass: payload.modelClass,
+        prompt: payload.prompt.value,
       })
       return {
         ...event,
@@ -124,13 +195,14 @@ export class RunManager {
     }
 
     if (event.type === "llm.step.completed") {
+      const payload = event.payload as LlmStepCompletedPayload
       const mapped = mapAiSdkEvent({
         type: "step-complete",
-        stageId: event.payload.stageId,
-        modelUsed: event.payload.modelUsed,
+        stageId: payload.stageId,
+        modelUsed: payload.modelUsed,
         usage: {
-          promptTokens: event.payload.usage.promptTokens,
-          completionTokens: event.payload.usage.completionTokens,
+          promptTokens: payload.usage.promptTokens,
+          completionTokens: payload.usage.completionTokens,
         },
       })
       return {
@@ -141,13 +213,14 @@ export class RunManager {
     }
 
     if (event.type === "llm.step.failed") {
+      const payload = event.payload as LlmStepFailedPayload
       const mapped = mapAiSdkEvent({
         type: "step-fail",
-        stageId: event.payload.stageId,
-        error: event.payload.error,
-        code: event.payload.providerFailure.code,
-        statusCode: event.payload.providerFailure.statusCode,
-        provider: event.payload.providerFailure.provider,
+        stageId: payload.stageId,
+        error: payload.error,
+        code: payload.providerFailure.code,
+        statusCode: payload.providerFailure.statusCode,
+        provider: payload.providerFailure.provider,
       })
       return {
         ...event,
@@ -217,7 +290,11 @@ export class RunManager {
         const current = this.runs.get(runId)
         if (current) {
           current.status = "failed"
-          await this.eventStore.updateRunStatus(runId, "failed")
+          await this.eventStore.updateRunStatus(runId, {
+            status: "failed",
+            endedAt: new Date().toISOString(),
+            error: "Runner execution failed",
+          })
         }
       })
 
