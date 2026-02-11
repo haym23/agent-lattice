@@ -1,5 +1,8 @@
-CC Workflow Studio
-Copyright (c) 2025 breaking-brake
+Agent Lattice
+Copyright (c) 2026 haym23
+
+Forked from CC Workflow Studio
+Original Copyright (c) 2025 breaking-brake
 
 ---
 
