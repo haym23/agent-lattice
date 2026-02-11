@@ -2,9 +2,8 @@
   "files": [],
   "references": [
     { "path": "packages/ir" },
-    { "path": "packages/protocol" },
     { "path": "packages/prompts" },
-    { "path": "packages/tools" },
+    { "path": "packages/llm" },
     { "path": "packages/compiler" },
     { "path": "packages/runtime" },
     { "path": "apps/server" },

@@ -11,6 +11,13 @@
 
     "sourceMap": true
   },
+  "references": [
+    { "path": "../../packages/ir" },
+    { "path": "../../packages/compiler" },
+    { "path": "../../packages/runtime" },
+    { "path": "../../packages/prompts" },
+    { "path": "../../packages/llm" }
+  ],
   "include": ["src"],
   "exclude": ["dist", "node_modules", "src/**/*.test.ts"]
 }

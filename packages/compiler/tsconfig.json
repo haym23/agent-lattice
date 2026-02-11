@@ -10,6 +10,7 @@
     "declarationMap": true,
     "sourceMap": true
   },
+  "references": [{ "path": "../ir" }],
   "include": ["."],
   "exclude": ["dist", "node_modules", "**/*.test.ts", "__snapshots__"]
 }

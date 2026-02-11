@@ -7,18 +7,17 @@
 - [ ] Update node editors for each node type
   - [ ] Add more styling, icons, adjustable input/output
   
-- [ ] Make header more user friendly
+- [x] Make header more user friendly
   - [ ] Interactive blocks
-  - [ ] Better workflow saving and compiling UX
-  - [ ] Fix search
+  - [x] Better workflow saving and compiling UX
 
 - [ ] Each node should follow Principle of Least Privilege 
   - [ ] See ClawdBot/MoltBot issues
   - [ ] Protect against prompt injection
 
-- [ ] Export to Claude, Codex, OpenCode, or Github Copilot
-- [ ] Launch with Claude, Codex, OpenCode, or Github Copilot
-  - [ ] Try with Codex first
+- [ ] Export to Claude, Codex, OpenCode, or Github Copilot (prompt)
+- [ ] Launch with Claude, OpenAI
+  - [x] Try with OpenAi first
 
 
 # Want

@@ -10,6 +10,11 @@
     "declarationMap": true,
     "sourceMap": true
   },
+  "references": [
+    { "path": "../ir" },
+    { "path": "../llm" },
+    { "path": "../prompts" }
+  ],
   "include": ["."],
   "exclude": ["dist", "node_modules", "**/*.test.ts"]
 }
