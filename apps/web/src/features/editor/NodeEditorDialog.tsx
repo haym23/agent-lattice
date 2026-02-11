@@ -12,6 +12,7 @@ interface NodeEditorDialogProps {
   onSelectedNodeLabelChange: (value: string) => void
   onSelectedNodeConfigJsonChange: (value: string) => void
   onApplyNodeChanges: () => void
+  onDeleteSelectedNode: () => void
 }
 
 export function NodeEditorDialog({
@@ -25,6 +26,7 @@ export function NodeEditorDialog({
   onSelectedNodeLabelChange,
   onSelectedNodeConfigJsonChange,
   onApplyNodeChanges,
+  onDeleteSelectedNode,
 }: NodeEditorDialogProps): JSX.Element {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -40,11 +42,10 @@ export function NodeEditorDialog({
           }}
         >
           <Dialog.Content
-            className="token-panel"
+            className="token-panel node-editor-dialog"
             style={{
-              width: "min(640px, 92vw)",
-              maxHeight: "82vh",
-              overflow: "auto",
+              width: "min(640px, calc(100vw - 24px))",
+              maxHeight: "calc(100vh - 24px)",
               padding: 16,
             }}
           >
@@ -54,7 +55,7 @@ export function NodeEditorDialog({
                 Click a node on the canvas to edit its settings.
               </p>
             ) : (
-              <>
+              <div className="node-editor-dialog-body">
                 <p style={{ margin: "8px 0", color: "#64748b", fontSize: 12 }}>
                   {selectedNode.type} ({selectedNode.id})
                 </p>
@@ -69,7 +70,7 @@ export function NodeEditorDialog({
                   />
                 ) : null}
                 <label
-                  style={{ display: "block", marginBottom: 6 }}
+                  className="node-editor-dialog-label"
                   htmlFor="node-label-input"
                 >
                   Label
@@ -80,10 +81,10 @@ export function NodeEditorDialog({
                   onChange={(event) =>
                     onSelectedNodeLabelChange(event.target.value)
                   }
-                  style={{ width: "100%", marginBottom: 10 }}
+                  className="node-editor-dialog-input"
                 />
                 <label
-                  style={{ display: "block", marginBottom: 6 }}
+                  className="node-editor-dialog-label"
                   htmlFor="node-config-input"
                 >
                   Config (JSON)
@@ -94,26 +95,31 @@ export function NodeEditorDialog({
                   onChange={(event) =>
                     onSelectedNodeConfigJsonChange(event.target.value)
                   }
-                  rows={16}
-                  style={{
-                    width: "100%",
-                    fontFamily:
-                      "ui-monospace, SFMono-Regular, Menlo, monospace",
-                  }}
+                  rows={12}
+                  className="node-editor-dialog-textarea"
                 />
                 {configError ? (
                   <p style={{ color: "#b91c1c", fontSize: 12, marginTop: 8 }}>
                     {configError}
                   </p>
                 ) : null}
-                <button
-                  type="button"
-                  onClick={onApplyNodeChanges}
-                  style={{ marginTop: 10 }}
-                >
-                  Apply Node Changes
-                </button>
-              </>
+                <div className="node-editor-dialog-actions">
+                  <button
+                    type="button"
+                    onClick={onDeleteSelectedNode}
+                    className="workflow-btn node-editor-dialog-delete-btn"
+                  >
+                    Delete Node
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onApplyNodeChanges}
+                    className="workflow-btn workflow-btn--primary"
+                  >
+                    Apply Node Changes
+                  </button>
+                </div>
+              </div>
             )}
           </Dialog.Content>
         </Dialog.Overlay>

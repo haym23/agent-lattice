@@ -1,4 +1,5 @@
 import * as Dialog from "@radix-ui/react-dialog"
+import { useEffect, useState } from "react"
 
 interface CompilePreviewDialogProps {
   open: boolean
@@ -14,6 +15,35 @@ export function CompilePreviewDialog({
   onOpenChange,
   content,
 }: CompilePreviewDialogProps): JSX.Element {
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
+    "idle"
+  )
+
+  useEffect(() => {
+    if (!open) {
+      setCopyState("idle")
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (copyState === "idle") {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setCopyState("idle")
+    }, 2500)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [copyState])
+
+  const handleCopy = () => {
+    void navigator.clipboard
+      .writeText(content)
+      .then(() => setCopyState("copied"))
+      .catch(() => setCopyState("failed"))
+  }
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -28,30 +58,30 @@ export function CompilePreviewDialog({
           }}
         >
           <Dialog.Content
-            className="token-panel"
+            className="token-panel compile-preview-dialog"
             style={{
-              width: "min(920px, 92vw)",
-              maxHeight: "82vh",
-              overflow: "auto",
+              width: "min(920px, calc(100vw - 24px))",
+              maxHeight: "calc(100vh - 24px)",
               padding: 16,
             }}
           >
-            <Dialog.Title style={{ margin: 0 }}>
-              Compiled Output Preview
-            </Dialog.Title>
-            <pre
-              style={{
-                marginTop: 12,
-                padding: 12,
-                background: "#0f172a",
-                color: "#f8fafc",
-                borderRadius: 8,
-                maxHeight: "65vh",
-                overflow: "auto",
-              }}
-            >
-              {content}
-            </pre>
+            <div className="compile-preview-dialog-header">
+              <Dialog.Title style={{ margin: 0 }}>
+                Compiled Output Preview
+              </Dialog.Title>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="workflow-btn workflow-btn--secondary"
+              >
+                {copyState === "copied"
+                  ? "Copied"
+                  : copyState === "failed"
+                    ? "Copy Failed"
+                    : "Copy Prompt"}
+              </button>
+            </div>
+            <pre className="compile-preview-dialog-content">{content}</pre>
           </Dialog.Content>
         </Dialog.Overlay>
       </Dialog.Portal>

@@ -114,8 +114,14 @@ function buildEditorSnapshot(input: {
  */
 export function EditorPage(): JSX.Element {
   const { id: routeWorkflowId } = useParams<{ id?: string }>()
-  const { addNode, nodes, edges, selectedNodeId, updateSelectedNode } =
-    useWorkflowStore()
+  const {
+    addNode,
+    nodes,
+    edges,
+    selectedNodeId,
+    updateSelectedNode,
+    deleteSelectedNode,
+  } = useWorkflowStore()
   const [workflowName, setWorkflowName] = useState("new-workflow")
   const [modelId, setModelId] = useState("claude-sonnet")
   const [target, setTarget] = useState<
@@ -298,11 +304,15 @@ export function EditorPage(): JSX.Element {
     }
   }
 
+  const handleDeleteSelectedNode = () => {
+    deleteSelectedNode()
+    setIsNodeEditorOpen(false)
+  }
+
   return (
     <main className="page">
       <PageShell
         title="Workflow Editor"
-        description="Build and iterate workflows using the compact action toolbar."
       />
       <section className="card" style={{ marginTop: 12 }}>
         <header className="workflow-toolbar" role="toolbar">
@@ -530,6 +540,7 @@ export function EditorPage(): JSX.Element {
         onSelectedNodeLabelChange={setSelectedNodeLabel}
         onSelectedNodeConfigJsonChange={setSelectedNodeConfigJson}
         onApplyNodeChanges={handleApplyNodeChanges}
+        onDeleteSelectedNode={handleDeleteSelectedNode}
       />
       <CompilePreviewDialog
         open={isCompileDialogOpen}

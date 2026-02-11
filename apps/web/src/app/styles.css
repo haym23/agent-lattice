@@ -27,7 +27,7 @@ body {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
-  padding: 16px;
+  padding: 8px;
 }
 
 .nav {
@@ -45,6 +45,119 @@ body {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
+}
+
+.node-editor-dialog {
+  border-color: #d1d9e7;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(14, 165, 233, 0.12),
+      transparent 52%
+    ), linear-gradient(180deg, #ffffff, #f8fbff);
+  box-shadow:
+    0 20px 45px rgba(15, 23, 42, 0.26),
+    0 2px 6px rgba(15, 23, 42, 0.12);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.node-editor-dialog-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.node-editor-dialog-label {
+  display: block;
+  margin-bottom: 6px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.node-editor-dialog-input,
+.node-editor-dialog-textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 8px 10px;
+}
+
+.node-editor-dialog-input {
+  margin-bottom: 10px;
+}
+
+.node-editor-dialog-textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  line-height: 1.45;
+  resize: vertical;
+  min-height: 180px;
+  max-height: min(42vh, 420px);
+}
+
+.node-editor-dialog-input:focus-visible,
+.node-editor-dialog-textarea:focus-visible {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+}
+
+.node-editor-dialog-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.node-editor-dialog-delete-btn {
+  border-color: #ef4444;
+  background: linear-gradient(145deg, #ef4444, #dc2626);
+  color: #fff;
+}
+
+.node-editor-dialog-delete-btn:hover {
+  border-color: #b91c1c;
+}
+
+.compile-preview-dialog {
+  border-color: #cfd9e8;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(56, 189, 248, 0.14),
+      transparent 54%
+    ), linear-gradient(180deg, #fbfdff, #f3f7fc);
+  box-shadow:
+    0 20px 45px rgba(15, 23, 42, 0.28),
+    0 2px 6px rgba(15, 23, 42, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.compile-preview-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.compile-preview-dialog-content {
+  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #1e293b;
+  background: #0f172a;
+  color: #f8fafc;
+  overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  white-space: pre;
 }
 
 .workflow-toolbar {

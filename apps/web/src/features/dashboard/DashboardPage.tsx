@@ -35,7 +35,6 @@ export function DashboardPage(): JSX.Element {
     <main className="page">
       <PageShell
         title="Dashboard"
-        description="Your saved workflows. Create a new one or open an existing workflow."
       />
       <section className="card" style={{ marginTop: 12 }}>
         <div

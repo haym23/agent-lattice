@@ -27,6 +27,7 @@ export interface EditorState {
     label: string
     config: Record<string, unknown>
   }) => void
+  deleteSelectedNode: () => void
 }
 
 const initialNodes: Node[] = [
@@ -107,6 +108,21 @@ export const useWorkflowStore = create<EditorState>((set, get) => ({
           },
         }
       }),
+    })
+  },
+  deleteSelectedNode: () => {
+    const selectedNodeId = get().selectedNodeId
+    if (!selectedNodeId) {
+      return
+    }
+
+    set({
+      nodes: get().nodes.filter((node) => node.id !== selectedNodeId),
+      edges: get().edges.filter(
+        (edge) =>
+          edge.source !== selectedNodeId && edge.target !== selectedNodeId
+      ),
+      selectedNodeId: null,
     })
   },
 }))
