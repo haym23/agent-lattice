@@ -22,12 +22,14 @@ import type {
 } from "./platform-adapter"
 
 const TERMINAL_EVENT_TYPES = new Set<WorkflowStreamEventType>([
+  "run.waiting",
   "run.completed",
   "run.failed",
 ])
 
 const WORKFLOW_STREAM_EVENT_TYPES: WorkflowStreamEventType[] = [
   "run.started",
+  "run.waiting",
   "run.completed",
   "run.failed",
   "stage.started",
@@ -236,7 +238,12 @@ export class WebPlatformAdapter implements PlatformAdapter {
 
         eventSource.close()
         resolve({
-          status: event.type === "run.completed" ? "completed" : "failed",
+          status:
+            event.type === "run.completed"
+              ? "completed"
+              : event.type === "run.waiting"
+                ? "waiting"
+                : "failed",
           runId,
           finalState: DEFAULT_STATE,
           events: [...events].sort((left, right) => left.seq - right.seq),

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { askUserQuestionLowerer } from "./ask-user-question-lowerer"
 import { ifElseLowerer } from "./if-else-lowerer"
 import { promptLowerer } from "./prompt-lowerer"
 
@@ -71,5 +72,43 @@ describe("lowerers", () => {
     )
     expect(fragment.nodes[0].op).toBe("SWITCH")
     expect(fragment.edges).toHaveLength(2)
+  })
+
+  it("askUserQuestion lowerer emits branch edges", () => {
+    const context = {
+      ...baseContext,
+      outgoingEdges: new Map([
+        [
+          "q1",
+          [
+            { id: "e1", source: "q1", target: "parallel" },
+            { id: "e2", source: "q1", target: "in-place" },
+          ],
+        ],
+      ]),
+    }
+
+    const fragment = askUserQuestionLowerer.lower(
+      {
+        id: "q1",
+        type: "askUserQuestion",
+        label: "Question",
+        position: { x: 0, y: 0 },
+        config: {
+          questionText: "Which strategy?",
+          options: [{ label: "Parallel" }, { label: "In-place" }],
+        },
+      },
+      context
+    )
+
+    expect(fragment.nodes[0].op).toBe("SWITCH")
+    expect(fragment.edges).toHaveLength(2)
+    expect(fragment.edges[0]?.when).toEqual({
+      op: "eq",
+      left: "$in.askUserQuestion.q1",
+      right: "Parallel",
+    })
+    expect(fragment.edges[1]?.when).toEqual({ op: "always" })
   })
 })

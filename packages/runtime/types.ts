@@ -8,6 +8,7 @@ export type StateSnapshot = {
 export type ExecutionStatus =
   | "idle"
   | "running"
+  | "waiting"
   | "completed"
   | "failed"
   | "cancelled"
@@ -23,6 +24,7 @@ export type WorkflowStreamEventVersion = "1.0"
 
 export type WorkflowStreamEventType =
   | "run.started"
+  | "run.waiting"
   | "run.completed"
   | "run.failed"
   | "stage.started"
@@ -53,6 +55,18 @@ export interface RunStartedPayload {
 
 export interface RunCompletedPayload {
   status: "completed" | "cancelled"
+}
+
+export interface RunWaitingPayload {
+  status: "waiting"
+  stageId: string
+  question: string
+  options: Array<{
+    label: string
+    value: string
+    description?: string
+  }>
+  inputPath: string
 }
 
 export interface RunFailedPayload {
@@ -147,6 +161,7 @@ export interface TraceBreadcrumbPayload {
 
 export interface WorkflowStreamPayloadMap {
   "run.started": RunStartedPayload
+  "run.waiting": RunWaitingPayload
   "run.completed": RunCompletedPayload
   "run.failed": RunFailedPayload
   "stage.started": StageStartedPayload
@@ -190,5 +205,11 @@ export interface ExecutionResult {
   runId: string
   finalState: StateSnapshot
   events: ExecutionEvent[]
+  checkpoint?: {
+    queue: string[]
+    completedNodeIds: string[]
+    skippedNodeIds: string[]
+    state: StateSnapshot
+  }
   error?: Error
 }

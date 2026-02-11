@@ -1,7 +1,7 @@
 # NEED
 
-- [ ] Build out LRE
-  - [ ] Add block -> prompt translators for all node types  
+- [ ] Build out compiler
+  - [ ] Add block -> prompt translators for primitive node types  
 - [ ] Update compiler to use Anthropic best practices
 
 - [ ] Update node editors for each node type
@@ -18,7 +18,6 @@
 - [ ] Export to Claude, Codex, OpenCode, or Github Copilot (prompt)
 - [ ] Launch with Claude, OpenAI
   - [x] Try with OpenAi first
-
 
 # Want
 

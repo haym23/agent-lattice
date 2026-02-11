@@ -100,14 +100,15 @@ export function serializeStreamEvent(event: ExecutionEvent): string {
 
 export function createEventFactory(
   runId: string,
-  onEvent?: (event: ExecutionEvent) => void
+  onEvent?: (event: ExecutionEvent) => void,
+  initialSeq = 0
 ): {
   emit: <TType extends WorkflowStreamEventType>(
     type: TType,
     payload: WorkflowStreamPayloadMap[TType]
   ) => WorkflowStreamEventEnvelope<TType>
 } {
-  let seq = 0
+  let seq = initialSeq
 
   return {
     emit<TType extends WorkflowStreamEventType>(

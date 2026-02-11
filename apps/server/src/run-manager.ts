@@ -1,4 +1,5 @@
 import { lowerToExecIR } from "@lattice/compiler"
+import type { ExecProgram } from "@lattice/ir"
 import type { LlmProvider } from "@lattice/llm"
 import type {
   ExecutionEvent,
@@ -6,6 +7,7 @@ import type {
   LlmStepFailedPayload,
   LlmStepStartedPayload,
   RunFailedPayload,
+  RunWaitingPayload,
 } from "@lattice/runtime"
 import { createRunner, serializeStreamEvent } from "@lattice/runtime"
 import {
@@ -34,12 +36,27 @@ interface WorkflowRunRequest {
   input?: Record<string, unknown>
 }
 
+interface RunCheckpoint {
+  queue: string[]
+  completedNodeIds: string[]
+  skippedNodeIds: string[]
+  state: {
+    $vars: Record<string, unknown>
+    $tmp: Record<string, unknown>
+    $ctx: Record<string, unknown>
+    $in: Record<string, unknown>
+  }
+}
+
 interface RunRecord {
   runId: string
   status: RunStatus
   lastPersistedSeq: number
   listeners: Set<(event: ExecutionEvent) => void>
   processing: Promise<void>
+  program?: ExecProgram
+  runner?: ReturnType<typeof createRunner>
+  checkpoint?: RunCheckpoint
 }
 
 export class RunManager {
@@ -89,7 +106,7 @@ export class RunManager {
     }
 
     for (const [runId, run] of this.runs.entries()) {
-      if (run.status !== "running") {
+      if (run.status !== "running" && run.status !== "waiting") {
         this.runs.delete(runId)
       }
     }
@@ -133,6 +150,12 @@ export class RunManager {
           await this.eventStore.updateRunStatus(runId, {
             status: "completed",
             endedAt: event.timestamp,
+          })
+        }
+        if (event.type === "run.waiting") {
+          run.status = "waiting"
+          await this.eventStore.updateRunStatus(runId, {
+            status: "waiting",
           })
         }
         if (event.type === "run.failed") {
@@ -267,6 +290,8 @@ export class RunManager {
       lastPersistedSeq: 0,
       listeners: new Set(),
       processing: Promise.resolve(),
+      program,
+      runner,
     }
     this.runs.set(runId, run)
 
@@ -286,6 +311,13 @@ export class RunManager {
           },
         }
       )
+      .then(async (result) => {
+        const current = this.runs.get(runId)
+        if (!current) {
+          return
+        }
+        current.checkpoint = result.checkpoint
+      })
       .catch(async () => {
         const current = this.runs.get(runId)
         if (current) {
@@ -299,6 +331,73 @@ export class RunManager {
       })
 
     return runId
+  }
+
+  async resumeRun(
+    runId: string,
+    input: Record<string, unknown> = {}
+  ): Promise<{
+    runId: string
+    status: RunStatus
+    waiting?: RunWaitingPayload
+  }> {
+    const run = await this.getOrSyncRun(runId)
+    if (!run) {
+      throw new Error("run not found")
+    }
+    if (
+      run.status !== "waiting" ||
+      !run.checkpoint ||
+      !run.program ||
+      !run.runner
+    ) {
+      throw new Error("run is not waiting for user input")
+    }
+
+    const mapAiSdkEvent = createAiSdkEventMapper(runId)
+    run.status = "running"
+    await this.eventStore.updateRunStatus(runId, {
+      status: "running",
+    })
+
+    void run.runner
+      .execute(
+        run.program,
+        input,
+        {},
+        {
+          runId,
+          initialSeq: run.lastPersistedSeq,
+          checkpoint: run.checkpoint,
+          onEvent: (event) => {
+            const normalizedEvent = this.normalizeProviderLifecycleEvent(
+              event,
+              mapAiSdkEvent
+            )
+            this.enqueueRunEvent(runId, normalizedEvent)
+          },
+        }
+      )
+      .then((result) => {
+        const current = this.runs.get(runId)
+        if (!current) {
+          return
+        }
+        current.checkpoint = result.checkpoint
+      })
+      .catch(async () => {
+        const current = this.runs.get(runId)
+        if (current) {
+          current.status = "failed"
+          await this.eventStore.updateRunStatus(runId, {
+            status: "failed",
+            endedAt: new Date().toISOString(),
+            error: "Runner resume failed",
+          })
+        }
+      })
+
+    return { runId, status: "running" }
   }
 
   async getRun(runId: string): Promise<RunRecord | undefined> {

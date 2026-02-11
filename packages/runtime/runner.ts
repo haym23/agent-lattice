@@ -37,7 +37,74 @@ interface RunnerDependencies {
 
 interface ExecuteOptions {
   runId?: string
+  initialSeq?: number
+  checkpoint?: {
+    queue: string[]
+    completedNodeIds: string[]
+    skippedNodeIds: string[]
+    state: {
+      $vars: Record<string, unknown>
+      $tmp: Record<string, unknown>
+      $ctx: Record<string, unknown>
+      $in: Record<string, unknown>
+    }
+  }
   onEvent?: (event: ExecutionEvent) => void
+}
+
+function isSwitchAwaitingUserInput(node: ExecNode, state: StateStore): boolean {
+  if (node.op !== "SWITCH") {
+    return false
+  }
+  const questionText = node.inputs?.questionText
+  const evaluationTarget = node.inputs?.evaluationTarget
+  if (
+    typeof questionText !== "string" ||
+    typeof evaluationTarget !== "string"
+  ) {
+    return false
+  }
+  if (!isStateRef(evaluationTarget)) {
+    return false
+  }
+  const currentValue = state.get(evaluationTarget)
+  return (
+    currentValue === undefined || currentValue === null || currentValue === ""
+  )
+}
+
+function buildRunWaitingPayload(
+  node: ExecNode
+): WorkflowStreamPayloadMap["run.waiting"] {
+  const rawOptions = Array.isArray(node.inputs?.options)
+    ? (node.inputs?.options as Array<Record<string, unknown>>)
+    : []
+  const options = rawOptions.map((option, index) => {
+    const label =
+      typeof option.label === "string" && option.label.trim().length > 0
+        ? option.label
+        : `Option ${index + 1}`
+    const value =
+      typeof option.value === "string" && option.value.trim().length > 0
+        ? option.value
+        : label
+    const description =
+      typeof option.description === "string" ? option.description : undefined
+    return { label, value, description }
+  })
+  return {
+    status: "waiting",
+    stageId: node.id,
+    question:
+      typeof node.inputs?.questionText === "string"
+        ? node.inputs.questionText
+        : "Select an option",
+    options,
+    inputPath:
+      typeof node.inputs?.evaluationTarget === "string"
+        ? node.inputs.evaluationTarget
+        : `$in.askUserQuestion.${node.id}`,
+  }
 }
 
 function now(): string {
@@ -181,7 +248,11 @@ export class Runner {
     options: ExecuteOptions = {}
   ): Promise<ExecutionResult> {
     const runId = options.runId ?? crypto.randomUUID()
-    const eventFactory = createEventFactory(runId, options.onEvent)
+    const eventFactory = createEventFactory(
+      runId,
+      options.onEvent,
+      options.initialSeq ?? 0
+    )
     const events: ExecutionEvent[] = []
     const emit = <TType extends WorkflowStreamEventType>(
       type: TType,
@@ -192,19 +263,31 @@ export class Runner {
       return event
     }
 
-    const state = new StateStore(input, {
-      timestamp: now(),
-      executionId: runId,
-      ...context,
-    })
+    const checkpoint = options.checkpoint
+    const state = checkpoint
+      ? new StateStore(
+          input,
+          {
+            ...(checkpoint.state.$ctx ?? {}),
+            ...context,
+          },
+          checkpoint.state
+        )
+      : new StateStore(input, {
+          timestamp: now(),
+          executionId: runId,
+          ...context,
+        })
 
-    emit("run.started", {
-      status: "running",
-      input: redactContent(input, {
-        force: true,
-        redactionReason: "input-redacted-by-default",
-      }),
-    })
+    if (!checkpoint) {
+      emit("run.started", {
+        status: "running",
+        input: redactContent(input, {
+          force: true,
+          redactionReason: "input-redacted-by-default",
+        }),
+      })
+    }
 
     const nodeMap = new Map(program.nodes.map((node) => [node.id, node]))
     const outgoing = new Map<string, ExecEdge[]>()
@@ -222,8 +305,22 @@ export class Runner {
       incomingCount.set(edge.to, (incomingCount.get(edge.to) ?? 0) + 1)
     }
 
-    const queue: string[] = [program.entry_node]
+    const queue: string[] = checkpoint
+      ? [...checkpoint.queue]
+      : [program.entry_node]
     let status: ExecutionStatus = "running"
+    const restoredCompleted = checkpoint
+      ? checkpoint.completedNodeIds
+      : ([] as string[])
+    const restoredSkipped = checkpoint
+      ? checkpoint.skippedNodeIds
+      : ([] as string[])
+    for (const nodeId of restoredCompleted) {
+      completed.add(nodeId)
+    }
+    for (const nodeId of restoredSkipped) {
+      skipped.add(nodeId)
+    }
 
     while (queue.length > 0) {
       if (this.abortController.signal.aborted) {
@@ -252,9 +349,8 @@ export class Runner {
           stageId: nodeId,
           stageType: node.op,
         })
-        completed.add(nodeId)
-
         if (node.op === "END") {
+          completed.add(nodeId)
           status = "completed"
           break
         }
@@ -262,13 +358,24 @@ export class Runner {
         const outgoingEdges = outgoing.get(nodeId) ?? []
         let selectedEdges = outgoingEdges
         if (node.op === "SWITCH") {
-          selectedEdges = outgoingEdges.filter((edge) =>
-            evaluateWhen(edge, state)
+          if (isSwitchAwaitingUserInput(node, state)) {
+            const waitingPayload = buildRunWaitingPayload(node)
+            emit("run.waiting", waitingPayload)
+            status = "waiting"
+            queue.unshift(nodeId)
+            break
+          }
+
+          const matchedConditional = outgoingEdges.find(
+            (edge) => edge.when.op !== "always" && evaluateWhen(edge, state)
           )
-          if (selectedEdges.length === 0) {
-            selectedEdges = outgoingEdges
-              .filter((edge) => edge.when.op === "always")
-              .slice(0, 1)
+          if (matchedConditional) {
+            selectedEdges = [matchedConditional]
+          } else {
+            const defaultEdge = outgoingEdges.find(
+              (edge) => edge.when.op === "always"
+            )
+            selectedEdges = defaultEdge ? [defaultEdge] : []
           }
 
           for (const edge of outgoingEdges) {
@@ -277,6 +384,8 @@ export class Runner {
             }
           }
         }
+
+        completed.add(nodeId)
 
         for (const edge of selectedEdges) {
           const required = incomingCount.get(edge.to) ?? 0
@@ -318,6 +427,21 @@ export class Runner {
           events,
           error: error as Error,
         }
+      }
+    }
+
+    if (status === "waiting") {
+      return {
+        status,
+        runId,
+        finalState: state.snapshot(),
+        events,
+        checkpoint: {
+          queue,
+          completedNodeIds: [...completed],
+          skippedNodeIds: [...skipped],
+          state: state.snapshot(),
+        },
       }
     }
 

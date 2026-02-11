@@ -83,6 +83,66 @@ function makeBurstWorkflow(promptNodes = 20): Record<string, unknown> {
   }
 }
 
+function makeAskUserWorkflow(): Record<string, unknown> {
+  return {
+    id: "wf-server-ask-user",
+    name: "server-ask-user",
+    version: "1.0.0",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    nodes: [
+      {
+        id: "start",
+        type: "start",
+        label: "Start",
+        position: { x: 0, y: 0 },
+        config: {},
+      },
+      {
+        id: "question",
+        type: "askUserQuestion",
+        label: "Question",
+        position: { x: 100, y: 0 },
+        config: {
+          questionText: "Choose path",
+          options: [
+            { label: "Yes", value: "yes" },
+            { label: "No", value: "no" },
+          ],
+        },
+      },
+      {
+        id: "yes",
+        type: "prompt",
+        label: "Yes",
+        position: { x: 200, y: -40 },
+        config: { prompt: "yes path" },
+      },
+      {
+        id: "no",
+        type: "prompt",
+        label: "No",
+        position: { x: 200, y: 40 },
+        config: { prompt: "no path" },
+      },
+      {
+        id: "end",
+        type: "end",
+        label: "End",
+        position: { x: 300, y: 0 },
+        config: {},
+      },
+    ],
+    edges: [
+      { id: "e1", source: "start", target: "question" },
+      { id: "e2", source: "question", target: "yes" },
+      { id: "e3", source: "question", target: "no" },
+      { id: "e4", source: "yes", target: "end" },
+      { id: "e5", source: "no", target: "end" },
+    ],
+  }
+}
+
 function createTestApp() {
   const runManager = new RunManager({
     providerFactory: () => ({
@@ -307,6 +367,41 @@ describe("server SSE routes", () => {
     expect(eventsResponse.statusCode).toBe(200)
     expect(events[0]?.id).toBe(1)
     expect(events.some((event) => event.event === "run.started")).toBe(true)
+
+    await app.close()
+  })
+
+  it("supports resume endpoint for waiting runs", async () => {
+    const app = createTestApp()
+    const startResponse = await app.inject({
+      method: "POST",
+      url: "/runs",
+      payload: { workflow: makeAskUserWorkflow() },
+    })
+    const { runId } = startResponse.json<{ runId: string }>()
+
+    const waitingStream = await app.inject({
+      method: "GET",
+      url: `/runs/${runId}/events`,
+    })
+    const waitingEvents = parseSsePayload(waitingStream.payload)
+    expect(waitingEvents.at(-1)?.event).toBe("run.waiting")
+
+    const resumeResponse = await app.inject({
+      method: "POST",
+      url: `/runs/${runId}/resume`,
+      payload: { input: { askUserQuestion: { question: "yes" } } },
+    })
+    expect(resumeResponse.statusCode).toBe(200)
+
+    const resumedStream = await app.inject({
+      method: "GET",
+      url: `/runs/${runId}/events?lastSeq=${waitingEvents.at(-1)?.id ?? 0}`,
+    })
+    const resumedEvents = parseSsePayload(resumedStream.payload)
+    expect(resumedEvents.some((event) => event.event === "run.completed")).toBe(
+      true
+    )
 
     await app.close()
   })

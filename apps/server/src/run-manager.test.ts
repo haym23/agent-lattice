@@ -58,6 +58,66 @@ function makeLinearPromptWorkflow(promptNodes = 8): Record<string, unknown> {
   }
 }
 
+function makeAskUserWorkflow(): Record<string, unknown> {
+  return {
+    id: "wf-ask-user",
+    name: "ask-user",
+    version: "1.0.0",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    nodes: [
+      {
+        id: "start",
+        type: "start",
+        label: "Start",
+        position: { x: 0, y: 0 },
+        config: {},
+      },
+      {
+        id: "question",
+        type: "askUserQuestion",
+        label: "Question",
+        position: { x: 100, y: 0 },
+        config: {
+          questionText: "Choose path",
+          options: [
+            { label: "Yes", value: "yes" },
+            { label: "No", value: "no" },
+          ],
+        },
+      },
+      {
+        id: "yes",
+        type: "prompt",
+        label: "Yes",
+        position: { x: 200, y: -40 },
+        config: { prompt: "yes path" },
+      },
+      {
+        id: "no",
+        type: "prompt",
+        label: "No",
+        position: { x: 200, y: 40 },
+        config: { prompt: "no path" },
+      },
+      {
+        id: "end",
+        type: "end",
+        label: "End",
+        position: { x: 300, y: 0 },
+        config: {},
+      },
+    ],
+    edges: [
+      { id: "e1", source: "start", target: "question" },
+      { id: "e2", source: "question", target: "yes" },
+      { id: "e3", source: "question", target: "no" },
+      { id: "e4", source: "yes", target: "end" },
+      { id: "e5", source: "no", target: "end" },
+    ],
+  }
+}
+
 class ProbeStore extends InMemoryRunEventStore {
   async hasEvent(runId: string, seq: number): Promise<boolean> {
     const events = await this.listEvents(runId, seq - 1)
@@ -96,7 +156,11 @@ function collectRunEvents(
     void runManager
       .subscribe(runId, lastSeq, (event) => {
         events.push(event)
-        if (event.type === "run.completed" || event.type === "run.failed") {
+        if (
+          event.type === "run.completed" ||
+          event.type === "run.failed" ||
+          event.type === "run.waiting"
+        ) {
           unsubscribeFn?.()
           resolve(events)
         }
@@ -249,5 +313,29 @@ describe("RunManager", () => {
       expect(runFailure.payload.providerFailure?.code).toBe("rate_limit")
       expect(runFailure.payload.providerFailure?.statusCode).toBe(429)
     }
+  })
+
+  it("pauses on askUserQuestion and resumes to completion", async () => {
+    const { runManager } = createRunManagerWithMockProvider()
+    const runId = await runManager.startRun({
+      workflow: makeAskUserWorkflow(),
+    })
+
+    const waitingEvents = await collectRunEvents(runManager, runId)
+    expect(waitingEvents.at(-1)?.type).toBe("run.waiting")
+
+    const resume = await runManager.resumeRun(runId, {
+      askUserQuestion: { question: "yes" },
+    })
+    expect(resume.status).toBe("running")
+
+    const resumedEvents = await collectRunEvents(
+      runManager,
+      runId,
+      waitingEvents.at(-1)?.seq ?? 0
+    )
+    expect(resumedEvents.some((event) => event.type === "run.completed")).toBe(
+      true
+    )
   })
 })

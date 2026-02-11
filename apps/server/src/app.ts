@@ -50,6 +50,25 @@ export function createServerApp(
     }
   })
 
+  app.post("/runs/:runId/resume", async (request, reply) => {
+    const params = request.params as { runId: string }
+    const body = request.body as { input?: Record<string, unknown> } | undefined
+
+    try {
+      const result = await runManager.resumeRun(params.runId, body?.input ?? {})
+      return result
+    } catch (error) {
+      const message = (error as Error).message
+      if (message === "run not found") {
+        return reply.status(404).send({ error: message })
+      }
+      if (message === "run is not waiting for user input") {
+        return reply.status(409).send({ error: message })
+      }
+      throw error
+    }
+  })
+
   app.get("/runs/:runId/events", async (request, reply) => {
     const params = request.params as { runId: string }
     const query = request.query as { lastSeq?: string } | undefined
@@ -79,7 +98,11 @@ export function createServerApp(
       Number.isNaN(lastSeq) ? 0 : lastSeq,
       (event) => {
         reply.raw.write(toSseFrame(event))
-        if (event.type === "run.completed" || event.type === "run.failed") {
+        if (
+          event.type === "run.completed" ||
+          event.type === "run.failed" ||
+          event.type === "run.waiting"
+        ) {
           reply.raw.end()
         }
       }

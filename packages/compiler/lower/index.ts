@@ -2,6 +2,7 @@ import type { ExecEdge, ExecProgram } from "@lattice/ir"
 import { analyzeGraph } from "../analyzer"
 import type { WorkflowDocument, WorkflowEdge, WorkflowNode } from "../types"
 import {
+  askUserQuestionLowerer,
   dataTransformLowerer,
   endLowerer,
   httpRequestLowerer,
@@ -46,6 +47,7 @@ export function createDefaultLowererRegistry(): LowererRegistry {
   registry.register(endLowerer)
   registry.register(promptLowerer)
   registry.register(subAgentLowerer)
+  registry.register(askUserQuestionLowerer)
   registry.register(ifElseLowerer)
   registry.register(switchLowerer)
   registry.register(mcpLowerer)

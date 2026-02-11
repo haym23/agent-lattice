@@ -10,7 +10,7 @@ export const promptLowerer: Lowerer = {
       id: node.id,
       op: "LLM_WRITE",
       model_class: "SMALL_EXEC",
-      prompt_template: "llm-write-v1",
+      prompt_template: "node-prompt-v1",
       inputs: {
         instruction: promptText,
       },
@@ -22,7 +22,7 @@ export const promptLowerer: Lowerer = {
     return {
       nodes: [execNode],
       edges: [],
-      requiredTemplates: ["llm-write-v1"],
+      requiredTemplates: ["node-prompt-v1"],
     }
   },
 }

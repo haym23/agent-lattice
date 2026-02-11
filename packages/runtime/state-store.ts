@@ -45,8 +45,22 @@ export class StateStore {
 
   constructor(
     input: Record<string, unknown> = {},
-    context: Record<string, unknown> = {}
+    context: Record<string, unknown> = {},
+    baseState?: StateSnapshot
   ) {
+    if (baseState) {
+      this.state = deepClone(baseState)
+      this.state.$in = {
+        ...(this.state.$in ?? {}),
+        ...deepClone(input),
+      }
+      this.state.$ctx = {
+        ...(this.state.$ctx ?? {}),
+        ...deepClone(context),
+      }
+      return
+    }
+
     this.state = {
       $vars: {},
       $tmp: {},

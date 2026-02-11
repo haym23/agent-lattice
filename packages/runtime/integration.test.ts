@@ -103,4 +103,86 @@ describe("runtime integration", () => {
     expect(result.status).toBe("completed")
     expect(result.finalState.$vars).toHaveProperty("http")
   })
+
+  it("routes askUserQuestion branches from input", async () => {
+    const workflow = {
+      ...baseWorkflow(),
+      nodes: [
+        {
+          id: "start",
+          type: "start" as const,
+          label: "Start",
+          position: { x: 0, y: 0 },
+          config: {},
+        },
+        {
+          id: "question",
+          type: "askUserQuestion" as const,
+          label: "Question",
+          position: { x: 100, y: 0 },
+          config: {
+            questionText: "Which strategy?",
+            options: [{ label: "Parallel" }, { label: "In-place" }],
+          },
+        },
+        {
+          id: "parallel",
+          type: "prompt" as const,
+          label: "Parallel Path",
+          position: { x: 200, y: -50 },
+          config: { prompt: "Take parallel path" },
+        },
+        {
+          id: "in-place",
+          type: "prompt" as const,
+          label: "In-place Path",
+          position: { x: 200, y: 50 },
+          config: { prompt: "Take in-place path" },
+        },
+        {
+          id: "end",
+          type: "end" as const,
+          label: "End",
+          position: { x: 300, y: 0 },
+          config: {},
+        },
+      ],
+      edges: [
+        { id: "e1", source: "start", target: "question" },
+        { id: "e2", source: "question", target: "parallel" },
+        { id: "e3", source: "question", target: "in-place" },
+        { id: "e4", source: "parallel", target: "end" },
+        { id: "e5", source: "in-place", target: "end" },
+      ],
+    }
+
+    const program = lowerToExecIR(workflow)
+    const runner = createRunner(
+      new MockLlmProvider((request) => {
+        const prompt = request.messages[1]?.content ?? ""
+        if (prompt.includes("Take parallel path")) {
+          return {
+            content: '{"route":"parallel"}',
+            parsed: { route: "parallel" },
+            usage: { promptTokens: 1, completionTokens: 1 },
+            modelUsed: "SMALL_EXEC",
+          }
+        }
+        return {
+          content: '{"route":"in-place"}',
+          parsed: { route: "in-place" },
+          usage: { promptTokens: 1, completionTokens: 1 },
+          modelUsed: "SMALL_EXEC",
+        }
+      })
+    )
+
+    const result = await runner.execute(program, {
+      askUserQuestion: { question: "Parallel" },
+    })
+
+    expect(result.status).toBe("completed")
+    expect(result.finalState.$vars).toHaveProperty("parallel")
+    expect(result.finalState.$vars).not.toHaveProperty("in-place")
+  })
 })

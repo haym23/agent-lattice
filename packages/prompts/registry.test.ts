@@ -41,6 +41,11 @@ describe("PromptTemplateRegistry", () => {
   it("creates default registry with built-in templates", () => {
     const registry = createDefaultPromptRegistry()
     const ids = registry.list().map((t) => t.id)
+    expect(ids).toContain("node-prompt-v1")
+    expect(ids).toContain("node-sub-agent-v1")
+    expect(ids).toContain("node-if-else-v1")
+    expect(ids).toContain("node-switch-v1")
+    expect(ids).toContain("node-ask-user-question-v1")
     expect(ids).toContain("llm-write-v1")
     expect(ids).toContain("llm-classify-v1")
     expect(ids).toContain("repair-v1")

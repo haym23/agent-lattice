@@ -12,7 +12,7 @@ export const subAgentLowerer: Lowerer = {
       id: node.id,
       op: "LLM_WRITE",
       model_class: "SMALL_EXEC",
-      prompt_template: "llm-write-v1",
+      prompt_template: "node-sub-agent-v1",
       inputs: {
         instruction: description
           ? `${description}\n\n${promptText}`
@@ -26,7 +26,7 @@ export const subAgentLowerer: Lowerer = {
     return {
       nodes: [execNode],
       edges: [],
-      requiredTemplates: ["llm-write-v1"],
+      requiredTemplates: ["node-sub-agent-v1"],
     }
   },
 }

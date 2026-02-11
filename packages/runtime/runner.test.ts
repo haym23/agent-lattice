@@ -89,6 +89,106 @@ describe("Runner", () => {
     expect(result.finalState.$vars).toHaveProperty("branch", "yes")
   })
 
+  it("prefers matched switch branch over default always branch", async () => {
+    const runner = makeRunner()
+    const program: ExecProgram = {
+      execir_version: "1.0",
+      entry_node: "start",
+      nodes: [
+        { id: "start", op: "START" },
+        { id: "set", op: "VAR_SET", target: "$vars.flag", value: "yes" },
+        { id: "switch", op: "SWITCH" },
+        { id: "yes", op: "VAR_SET", target: "$vars.yesTaken", value: true },
+        {
+          id: "default",
+          op: "VAR_SET",
+          target: "$vars.defaultTaken",
+          value: true,
+        },
+        { id: "end", op: "END" },
+      ],
+      edges: [
+        { from: "start", to: "set", when: { op: "always" } },
+        { from: "set", to: "switch", when: { op: "always" } },
+        {
+          from: "switch",
+          to: "yes",
+          when: { op: "eq", left: "$vars.flag", right: "yes" },
+        },
+        { from: "switch", to: "default", when: { op: "always" } },
+        { from: "yes", to: "end", when: { op: "always" } },
+        { from: "default", to: "end", when: { op: "always" } },
+      ],
+    }
+
+    const result = await runner.execute(program)
+    expect(result.status).toBe("completed")
+    expect(result.finalState.$vars).toHaveProperty("yesTaken", true)
+    expect(result.finalState.$vars).not.toHaveProperty("defaultTaken")
+  })
+
+  it("pauses on askUserQuestion switch and resumes with user input", async () => {
+    const runner = makeRunner()
+    const program: ExecProgram = {
+      execir_version: "1.0",
+      entry_node: "start",
+      nodes: [
+        { id: "start", op: "START" },
+        {
+          id: "question",
+          op: "SWITCH",
+          inputs: {
+            evaluationTarget: "$in.askUserQuestion.question",
+            questionText: "Which path should we take?",
+            options: [
+              { label: "Yes", value: "yes" },
+              { label: "No", value: "no" },
+            ],
+          },
+        },
+        { id: "yes", op: "VAR_SET", target: "$vars.branch", value: "yes" },
+        { id: "no", op: "VAR_SET", target: "$vars.branch", value: "no" },
+        { id: "end", op: "END" },
+      ],
+      edges: [
+        { from: "start", to: "question", when: { op: "always" } },
+        {
+          from: "question",
+          to: "yes",
+          when: {
+            op: "eq",
+            left: "$in.askUserQuestion.question",
+            right: "yes",
+          },
+        },
+        { from: "question", to: "no", when: { op: "always" } },
+        { from: "yes", to: "end", when: { op: "always" } },
+        { from: "no", to: "end", when: { op: "always" } },
+      ],
+    }
+
+    const first = await runner.execute(program)
+    expect(first.status).toBe("waiting")
+    expect(first.events.some((event) => event.type === "run.waiting")).toBe(
+      true
+    )
+    expect(first.checkpoint).toBeDefined()
+
+    const resumed = await runner.execute(
+      program,
+      { askUserQuestion: { question: "yes" } },
+      {},
+      {
+        runId: first.runId,
+        initialSeq: first.events.length,
+        checkpoint: first.checkpoint,
+      }
+    )
+
+    expect(resumed.status).toBe("completed")
+    expect(resumed.finalState.$vars).toHaveProperty("branch", "yes")
+  })
+
   it("fails when repair is exhausted", async () => {
     const provider = new MockLlmProvider(() => ({
       content: "not-json",

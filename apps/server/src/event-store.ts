@@ -3,7 +3,12 @@ import { dirname, resolve } from "node:path"
 import { DatabaseSync } from "node:sqlite"
 import type { ExecutionEvent } from "@lattice/runtime"
 
-export type RunStatus = "running" | "completed" | "failed" | "cancelled"
+export type RunStatus =
+  | "running"
+  | "waiting"
+  | "completed"
+  | "failed"
+  | "cancelled"
 
 export interface RedactionMetadataSnapshot {
   path: string
@@ -107,7 +112,11 @@ export class InMemoryRunEventStore implements RunEventStore {
 
   async pruneStaleRuns(cutoffTimestamp: string): Promise<number> {
     const removable = Array.from(this.runs.values()).filter((run) => {
-      return run.status !== "running" && run.updatedAt < cutoffTimestamp
+      return (
+        run.status !== "running" &&
+        run.status !== "waiting" &&
+        run.updatedAt < cutoffTimestamp
+      )
     })
 
     for (const run of removable) {
@@ -363,7 +372,7 @@ export class SqliteRunEventStore implements RunEventStore {
         `
           SELECT run_id
           FROM runs
-          WHERE status != 'running' AND updated_at < ?
+          WHERE status NOT IN ('running', 'waiting') AND updated_at < ?
         `
       )
       .all(cutoffTimestamp) as Array<{ run_id: string }>

@@ -99,21 +99,6 @@ export const nodeCatalog: NodeDefinition[] = [
     defaultConfig: { flowId: "", outputPorts: 1 },
   },
   {
-    type: "codex",
-    category: "agent",
-    title: "Codex",
-    description: "OpenAI Codex CLI execution step.",
-    defaultConfig: {
-      label: "Codex",
-      promptMode: "fixed",
-      prompt: "",
-      model: "gpt-5.2-codex",
-      reasoningEffort: "medium",
-      sandbox: "workspace-write",
-      outputPorts: 1,
-    },
-  },
-  {
     type: "branch",
     category: "logic",
     title: "Legacy Branch",

@@ -99,4 +99,61 @@ describe("lowerToExecIR", () => {
       "Unsupported workflow node type"
     )
   })
+
+  it("supports askUserQuestion node", () => {
+    const workflow: WorkflowDocument = {
+      ...makeWorkflow(),
+      nodes: [
+        {
+          id: "start",
+          type: "start",
+          label: "Start",
+          position: { x: 0, y: 0 },
+          config: {},
+        },
+        {
+          id: "question",
+          type: "askUserQuestion",
+          label: "Question",
+          position: { x: 100, y: 0 },
+          config: {
+            questionText: "Pick a route",
+            options: [{ label: "A" }, { label: "B" }],
+          },
+        },
+        {
+          id: "routeA",
+          type: "prompt",
+          label: "Route A",
+          position: { x: 200, y: -40 },
+          config: { prompt: "Path A" },
+        },
+        {
+          id: "routeB",
+          type: "prompt",
+          label: "Route B",
+          position: { x: 200, y: 40 },
+          config: { prompt: "Path B" },
+        },
+        {
+          id: "end",
+          type: "end",
+          label: "End",
+          position: { x: 300, y: 0 },
+          config: {},
+        },
+      ],
+      edges: [
+        { id: "e1", source: "start", target: "question" },
+        { id: "e2", source: "question", target: "routeA" },
+        { id: "e3", source: "question", target: "routeB" },
+        { id: "e4", source: "routeA", target: "end" },
+        { id: "e5", source: "routeB", target: "end" },
+      ],
+    }
+
+    const output = lowerToExecIR(workflow)
+    const switchNode = output.nodes.find((node) => node.id === "question")
+    expect(switchNode?.op).toBe("SWITCH")
+  })
 })
