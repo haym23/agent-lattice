@@ -45,7 +45,7 @@ export interface LlmProvider {
  */
 export class MissingApiKeyError extends Error {
   constructor() {
-    super("Missing OpenAI API key. Set VITE_OPENAI_API_KEY.")
+    super("Missing OpenAI API key. Set OPENAI_API_KEY or VITE_OPENAI_API_KEY.")
     this.name = "MissingApiKeyError"
   }
 }

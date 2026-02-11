@@ -16,16 +16,26 @@ export function ExecutionLog({ events }: ExecutionLogProps): JSX.Element {
           <div key={`${event.runId}-${event.seq}`}>
             <strong>{event.type}</strong> <span>#{event.seq}</span>{" "}
             {event.type.startsWith("stage.") ? (
-              <span>{event.payload.stageId}</span>
+              <span>
+                {"stageId" in event.payload ? event.payload.stageId : ""}
+              </span>
             ) : null}
             {event.type === "tool.called" || event.type === "tool.result" ? (
-              <span>({event.payload.toolName})</span>
+              <span>
+                ({"toolName" in event.payload ? event.payload.toolName : ""})
+              </span>
             ) : null}
             {event.type === "stage.failed" ||
             event.type === "tool.failed" ||
             event.type === "llm.step.failed" ||
             event.type === "run.failed" ? (
-              <span style={{ color: "#b91c1c" }}> - {event.payload.error}</span>
+              <span style={{ color: "#b91c1c" }}>
+                {" "}
+                -{" "}
+                {"error" in event.payload
+                  ? event.payload.error
+                  : "Unknown error"}
+              </span>
             ) : null}
             {"details" in event.payload && event.payload.details.isRedacted ? (
               <span style={{ color: "#92400e" }}> [redacted]</span>

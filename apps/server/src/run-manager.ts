@@ -1,14 +1,20 @@
 import { lowerToExecIR } from "@lattice/compiler"
+import type { LlmProvider } from "@lattice/llm"
 import type { ExecutionEvent } from "@lattice/runtime"
 import { createRunner, serializeStreamEvent } from "@lattice/runtime"
+import {
+  InMemoryRunEventStore,
+  type RunEventStore,
+  type RunStatus,
+} from "./event-store.js"
+import {
+  createProviderFromEnv,
+  type LlmProviderFactory,
+} from "./provider-factory.js"
 
-interface LocalLlmProvider {
-  chat(request: { modelClass: string }): Promise<{
-    content: string
-    parsed: Record<string, unknown>
-    usage: { promptTokens: number; completionTokens: number }
-    modelUsed: string
-  }>
+interface RunManagerOptions {
+  providerFactory?: LlmProviderFactory
+  eventStore?: RunEventStore
 }
 
 interface WorkflowRunRequest {
@@ -18,40 +24,117 @@ interface WorkflowRunRequest {
 
 interface RunRecord {
   runId: string
-  status: "running" | "completed" | "failed"
-  events: ExecutionEvent[]
+  status: RunStatus
+  lastPersistedSeq: number
   listeners: Set<(event: ExecutionEvent) => void>
+  processing: Promise<void>
 }
 
 export class RunManager {
   private readonly runs = new Map<string, RunRecord>()
+  private readonly providerFactory: LlmProviderFactory
+  private readonly eventStore: RunEventStore
 
-  constructor(private readonly replayLimit = 200) {}
+  constructor(options: RunManagerOptions = {}) {
+    this.providerFactory = options.providerFactory ?? createProviderFromEnv
+    this.eventStore = options.eventStore ?? new InMemoryRunEventStore()
+  }
 
-  private createProvider(): LocalLlmProvider {
-    return {
-      async chat(request) {
-        return {
-          content: JSON.stringify({ ok: true }),
-          parsed: { ok: true },
-          usage: { promptTokens: 0, completionTokens: 0 },
-          modelUsed: request.modelClass,
-        }
-      },
+  private createRunnerWithProvider(): ReturnType<typeof createRunner> {
+    const provider: LlmProvider = this.providerFactory()
+    return createRunner(provider)
+  }
+
+  private enqueueRunEvent(runId: string, event: ExecutionEvent): void {
+    const run = this.runs.get(runId)
+    if (!run) {
+      return
     }
+
+    run.processing = run.processing
+      .then(async () => {
+        if (event.seq <= run.lastPersistedSeq) {
+          return
+        }
+
+        if (event.seq !== run.lastPersistedSeq + 1) {
+          throw new Error(
+            `Non-monotonic event sequence for run ${runId}: expected ${run.lastPersistedSeq + 1}, got ${event.seq}`
+          )
+        }
+
+        await this.eventStore.appendEvent(event)
+        run.lastPersistedSeq = event.seq
+
+        if (event.type === "run.completed") {
+          run.status = "completed"
+          await this.eventStore.updateRunStatus(runId, "completed")
+        }
+        if (event.type === "run.failed") {
+          run.status = "failed"
+          await this.eventStore.updateRunStatus(runId, "failed")
+        }
+
+        for (const listener of run.listeners) {
+          listener(event)
+        }
+      })
+      .catch(async (error) => {
+        run.status = "failed"
+        const terminalEvent: ExecutionEvent = {
+          eventVersion: "1.0",
+          runId,
+          seq: run.lastPersistedSeq + 1,
+          timestamp: new Date().toISOString(),
+          type: "run.failed",
+          payload: {
+            status: "failed",
+            error: (error as Error).message,
+          },
+        }
+        await this.eventStore.appendEvent(terminalEvent)
+        run.lastPersistedSeq = terminalEvent.seq
+        await this.eventStore.updateRunStatus(runId, "failed")
+        for (const listener of run.listeners) {
+          listener(terminalEvent)
+        }
+      })
+  }
+
+  private async getOrSyncRun(runId: string): Promise<RunRecord | undefined> {
+    const inMemory = this.runs.get(runId)
+    if (inMemory) {
+      return inMemory
+    }
+
+    const persisted = await this.eventStore.getRun(runId)
+    if (!persisted) {
+      return undefined
+    }
+
+    const restored: RunRecord = {
+      runId,
+      status: persisted.status,
+      lastPersistedSeq: persisted.lastSeq,
+      listeners: new Set(),
+      processing: Promise.resolve(),
+    }
+    this.runs.set(runId, restored)
+    return restored
   }
 
   async startRun(request: WorkflowRunRequest): Promise<string> {
-    const provider = this.createProvider()
-    const runner = createRunner(provider)
-    const program = lowerToExecIR(request.workflow as any)
+    const runner = this.createRunnerWithProvider()
+    const program = lowerToExecIR(request.workflow)
     const runId = crypto.randomUUID()
+    await this.eventStore.createRun(runId)
 
     const run: RunRecord = {
       runId,
       status: "running",
-      events: [],
+      lastPersistedSeq: 0,
       listeners: new Set(),
+      processing: Promise.resolve(),
     }
     this.runs.set(runId, run)
 
@@ -63,53 +146,43 @@ export class RunManager {
         {
           runId,
           onEvent: (event) => {
-            const current = this.runs.get(runId)
-            if (!current) {
-              return
-            }
-            current.events.push(event)
-            if (current.events.length > this.replayLimit) {
-              current.events.splice(0, current.events.length - this.replayLimit)
-            }
-            for (const listener of current.listeners) {
-              listener(event)
-            }
-            if (event.type === "run.completed") {
-              current.status = "completed"
-            }
-            if (event.type === "run.failed") {
-              current.status = "failed"
-            }
+            this.enqueueRunEvent(runId, event)
           },
         }
       )
-      .catch(() => {
+      .catch(async () => {
         const current = this.runs.get(runId)
         if (current) {
           current.status = "failed"
+          await this.eventStore.updateRunStatus(runId, "failed")
         }
       })
 
     return runId
   }
 
-  getRun(runId: string): RunRecord | undefined {
-    return this.runs.get(runId)
+  async getRun(runId: string): Promise<RunRecord | undefined> {
+    return this.getOrSyncRun(runId)
   }
 
-  subscribe(
+  async subscribe(
     runId: string,
     lastSeq: number,
     listener: (event: ExecutionEvent) => void
-  ): (() => void) | null {
-    const run = this.runs.get(runId)
+  ): Promise<(() => void) | null> {
+    const run = await this.getOrSyncRun(runId)
     if (!run) {
       return null
     }
 
-    for (const event of run.events) {
-      if (event.seq > lastSeq) {
+    await run.processing
+
+    const replayEvents = await this.eventStore.listEvents(runId, lastSeq)
+    let highestSeq = lastSeq
+    for (const event of replayEvents) {
+      if (event.seq > highestSeq) {
         listener(event)
+        highestSeq = event.seq
       }
     }
 
@@ -117,9 +190,20 @@ export class RunManager {
       return () => {}
     }
 
-    run.listeners.add(listener)
+    const orderedListener = (event: ExecutionEvent) => {
+      if (event.seq <= highestSeq) {
+        return
+      }
+      if (event.seq !== highestSeq + 1) {
+        return
+      }
+      highestSeq = event.seq
+      listener(event)
+    }
+
+    run.listeners.add(orderedListener)
     return () => {
-      run.listeners.delete(listener)
+      run.listeners.delete(orderedListener)
     }
   }
 }

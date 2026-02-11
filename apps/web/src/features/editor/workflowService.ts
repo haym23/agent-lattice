@@ -6,6 +6,65 @@ import { WebPlatformAdapter } from "../../services/web-adapter"
 
 let adapter: PlatformAdapter = new WebPlatformAdapter()
 
+export type SaveWorkflowMode = "save" | "save-as"
+
+function normalizeWorkflowName(name: string): string {
+  const normalized = name.trim()
+  return normalized.length > 0 ? normalized : "untitled-workflow"
+}
+
+function dedupeAndSortWorkflows(
+  workflows: WorkflowDocument[]
+): WorkflowDocument[] {
+  const uniqueById = new Map<string, WorkflowDocument>()
+  for (const workflow of workflows) {
+    const existing = uniqueById.get(workflow.id)
+    if (!existing) {
+      uniqueById.set(workflow.id, workflow)
+      continue
+    }
+
+    const existingUpdatedAt = Date.parse(existing.updatedAt)
+    const nextUpdatedAt = Date.parse(workflow.updatedAt)
+    if (Number.isNaN(existingUpdatedAt) || nextUpdatedAt >= existingUpdatedAt) {
+      uniqueById.set(workflow.id, workflow)
+    }
+  }
+
+  return [...uniqueById.values()].sort((left, right) => {
+    const rightTime = Date.parse(right.updatedAt)
+    const leftTime = Date.parse(left.updatedAt)
+    if (Number.isNaN(leftTime) || Number.isNaN(rightTime)) {
+      return left.name.localeCompare(right.name)
+    }
+    if (rightTime !== leftTime) {
+      return rightTime - leftTime
+    }
+    return left.name.localeCompare(right.name)
+  })
+}
+
+function resolveSaveAsName(
+  requestedName: string,
+  existing: WorkflowDocument[]
+): string {
+  if (!existing.some((workflow) => workflow.name === requestedName)) {
+    return requestedName
+  }
+
+  let copyIndex = 1
+  while (true) {
+    const candidate =
+      copyIndex === 1
+        ? `${requestedName} (copy)`
+        : `${requestedName} (copy ${copyIndex})`
+    if (!existing.some((workflow) => workflow.name === candidate)) {
+      return candidate
+    }
+    copyIndex += 1
+  }
+}
+
 export function setPlatformAdapter(custom: PlatformAdapter): void {
   adapter = custom
 }
@@ -23,14 +82,34 @@ export async function saveCurrentWorkflow(input: {
   description?: string
   nodes: Parameters<typeof serializeWorkflowFromCanvas>[0]["nodes"]
   edges: Parameters<typeof serializeWorkflowFromCanvas>[0]["edges"]
+  mode?: SaveWorkflowMode
 }): Promise<WorkflowDocument> {
-  const workflow = serializeWorkflowFromCanvas(input)
+  const mode = input.mode ?? "save"
+  const normalizedName = normalizeWorkflowName(input.name)
+  const isSaveAs = mode === "save-as"
+  const existingWorkflow = input.id
+    ? await adapter.loadWorkflow(input.id)
+    : null
+  const existingWorkflows = isSaveAs ? await listStoredWorkflows() : []
+  const workflow = serializeWorkflowFromCanvas({
+    ...input,
+    id: isSaveAs ? undefined : input.id,
+    name: isSaveAs
+      ? resolveSaveAsName(normalizedName, existingWorkflows)
+      : normalizedName,
+  })
+
+  if (existingWorkflow && !isSaveAs) {
+    workflow.createdAt = existingWorkflow.createdAt
+  }
+
   await adapter.saveWorkflow(workflow.id, workflow)
   return workflow
 }
 
 export async function listStoredWorkflows(): Promise<WorkflowDocument[]> {
-  return adapter.listWorkflows()
+  const workflows = await adapter.listWorkflows()
+  return dedupeAndSortWorkflows(workflows)
 }
 
 /**

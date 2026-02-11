@@ -55,13 +55,28 @@ export const useExecutionStore = create<ExecutionState>((set) => ({
       set((state) => {
         const nodeStatuses = { ...state.nodeStatuses }
         if (event.type === "stage.started") {
-          nodeStatuses[event.payload.stageId] = "running"
+          if (
+            "stageId" in event.payload &&
+            typeof event.payload.stageId === "string"
+          ) {
+            nodeStatuses[event.payload.stageId] = "running"
+          }
         }
         if (event.type === "stage.completed") {
-          nodeStatuses[event.payload.stageId] = "completed"
+          if (
+            "stageId" in event.payload &&
+            typeof event.payload.stageId === "string"
+          ) {
+            nodeStatuses[event.payload.stageId] = "completed"
+          }
         }
         if (event.type === "stage.failed") {
-          nodeStatuses[event.payload.stageId] = "failed"
+          if (
+            "stageId" in event.payload &&
+            typeof event.payload.stageId === "string"
+          ) {
+            nodeStatuses[event.payload.stageId] = "failed"
+          }
         }
 
         const nextEvents = [...state.events, event].sort((left, right) => {

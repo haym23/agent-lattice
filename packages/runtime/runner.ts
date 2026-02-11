@@ -20,6 +20,7 @@ import type {
   ExecutionEvent,
   ExecutionResult,
   ExecutionStatus,
+  ProviderFailure,
   WorkflowStreamEventType,
   WorkflowStreamPayloadMap,
 } from "./types"
@@ -45,6 +46,79 @@ function now(): string {
 
 function isStateRef(value: unknown): value is `$${string}` {
   return typeof value === "string" && value.startsWith("$")
+}
+
+function normalizeProviderFailure(error: unknown): ProviderFailure {
+  const unknownFailure: ProviderFailure = {
+    code: "unknown",
+    provider: "unknown",
+    retryable: false,
+  }
+
+  if (error instanceof SyntaxError) {
+    return {
+      code: "invalid_response",
+      provider: "unknown",
+      retryable: false,
+    }
+  }
+
+  if (!(error instanceof Error)) {
+    return unknownFailure
+  }
+
+  const provider = /openai/i.test(error.name) ? "openai" : "unknown"
+  if (error.name === "MissingApiKeyError") {
+    return {
+      code: "auth",
+      provider: "openai",
+      retryable: false,
+    }
+  }
+  const candidate = error as Error & {
+    status?: number
+    statusCode?: number
+    code?: string
+    cause?: { code?: string }
+  }
+  const statusCode = candidate.status ?? candidate.statusCode
+  const rawCode =
+    candidate.code ??
+    (typeof candidate.cause === "object" ? candidate.cause?.code : undefined)
+  const code = typeof rawCode === "string" ? rawCode.toLowerCase() : undefined
+
+  if (statusCode === 401 || statusCode === 403) {
+    return { code: "auth", provider, retryable: false, statusCode }
+  }
+  if (statusCode === 429) {
+    return { code: "rate_limit", provider, retryable: true, statusCode }
+  }
+  if (statusCode === 408 || statusCode === 504) {
+    return { code: "timeout", provider, retryable: true, statusCode }
+  }
+  if (typeof statusCode === "number" && statusCode >= 500) {
+    return {
+      code: "provider_unavailable",
+      provider,
+      retryable: true,
+      statusCode,
+    }
+  }
+
+  if (code?.includes("timeout") || code === "etimedout") {
+    return { code: "timeout", provider, retryable: true, statusCode }
+  }
+  if (
+    code === "econnreset" ||
+    code === "econnrefused" ||
+    code === "enotfound" ||
+    code === "eai_again" ||
+    code?.includes("network")
+  ) {
+    return { code: "network", provider, retryable: true, statusCode }
+  }
+
+  return { ...unknownFailure, provider, statusCode }
 }
 
 /**
@@ -216,10 +290,12 @@ export class Runner {
         }
       } catch (error) {
         status = "failed"
+        const providerFailure = normalizeProviderFailure(error)
         emit("stage.failed", {
           stageId: nodeId,
           stageType: node.op,
           error: (error as Error).message,
+          providerFailure,
         })
         emit("trace.breadcrumb", {
           stageId: nodeId,
@@ -233,6 +309,7 @@ export class Runner {
         emit("run.failed", {
           status: "failed",
           error: (error as Error).message,
+          providerFailure,
         })
         return {
           status,
@@ -441,9 +518,11 @@ export class Runner {
         state.set(node.outputs.result, output)
       }
     } catch (error) {
+      const providerFailure = normalizeProviderFailure(error)
       emit("llm.step.failed", {
         stageId: node.id,
         error: (error as Error).message,
+        providerFailure,
       })
       throw error
     }

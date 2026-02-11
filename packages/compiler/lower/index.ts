@@ -1,4 +1,4 @@
-import type { ExecEdge, ExecNode, ExecProgram } from "@lattice/ir"
+import type { ExecEdge, ExecProgram } from "@lattice/ir"
 import { analyzeGraph } from "../analyzer"
 import type { WorkflowDocument, WorkflowEdge, WorkflowNode } from "../types"
 import {

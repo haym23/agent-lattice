@@ -35,13 +35,21 @@ export function ModelCallsLog({ events }: ModelCallsLogProps): JSX.Element {
             </div>
             <div>Seq: {event.seq}</div>
             {event.type === "llm.step.completed" ? (
-              <div>Model: {event.payload.modelUsed}</div>
+              <div>
+                Model:{" "}
+                {"modelUsed" in event.payload ? event.payload.modelUsed : ""}
+              </div>
             ) : null}
             {event.type === "tool.called" ? (
-              <div>Tool: {event.payload.toolName}</div>
+              <div>
+                Tool:{" "}
+                {"toolName" in event.payload ? event.payload.toolName : ""}
+              </div>
             ) : null}
             {event.type === "trace.breadcrumb" ? (
-              <div>{event.payload.summary}</div>
+              <div>
+                {"summary" in event.payload ? event.payload.summary : ""}
+              </div>
             ) : null}
           </div>
         ))}

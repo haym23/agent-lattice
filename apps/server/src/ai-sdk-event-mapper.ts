@@ -87,6 +87,11 @@ export function mapAiSdkEventsToWorkflowStream(
       emit("llm.step.failed", {
         stageId: event.stageId,
         error: event.error,
+        providerFailure: {
+          code: "unknown",
+          provider: "unknown",
+          retryable: false,
+        },
       })
     )
   }

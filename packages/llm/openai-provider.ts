@@ -22,6 +22,14 @@ interface OpenAiProviderOptions {
  * Reads the OpenAI API key from Vite environment variables.
  */
 function readOpenAiApiKey(): string | undefined {
+  if (typeof process !== "undefined" && process.env) {
+    const serverApiKey =
+      process.env.OPENAI_API_KEY ?? process.env.VITE_OPENAI_API_KEY
+    if (serverApiKey) {
+      return serverApiKey
+    }
+  }
+
   const meta = import.meta as unknown as {
     env?: Record<string, string | undefined>
   }

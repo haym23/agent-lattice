@@ -222,11 +222,66 @@ describe("Runner", () => {
     expect(result.events.some((event) => event.type === "run.failed")).toBe(
       true
     )
+    const stageFailure = result.events.find(
+      (event) => event.type === "stage.failed"
+    )
+    if (stageFailure?.type === "stage.failed") {
+      expect(stageFailure.payload.providerFailure).toBeDefined()
+      expect(stageFailure.payload.providerFailure?.code).toBe("unknown")
+    }
     expect(
       result.events.some(
         (event) =>
           event.type === "tool.called" && event.payload.input.isRedacted
       )
     ).toBe(true)
+  })
+
+  it("normalizes provider failures into canonical event payloads", async () => {
+    const provider = new MockLlmProvider(() => {
+      const error = new Error("Rate limit") as Error & { status: number }
+      error.name = "OpenAIError"
+      error.status = 429
+      throw error
+    })
+    const runner = makeRunner(provider)
+    const program: ExecProgram = {
+      execir_version: "1.0",
+      entry_node: "start",
+      nodes: [
+        { id: "start", op: "START" },
+        {
+          id: "llm",
+          op: "LLM_WRITE",
+          model_class: "SMALL_EXEC",
+          prompt_template: "llm-write-v1",
+          output_schema: { type: "object" },
+          validators: [{ type: "json_schema", schema: { type: "object" } }],
+          outputs: { result: "$vars.llm.result" },
+        },
+      ],
+      edges: [{ from: "start", to: "llm", when: { op: "always" } }],
+    }
+
+    const result = await runner.execute(program)
+    expect(result.status).toBe("failed")
+
+    const llmFailure = result.events.find(
+      (event) => event.type === "llm.step.failed"
+    )
+    expect(llmFailure?.type).toBe("llm.step.failed")
+    if (llmFailure?.type === "llm.step.failed") {
+      expect(llmFailure.payload.providerFailure.code).toBe("rate_limit")
+      expect(llmFailure.payload.providerFailure.retryable).toBe(true)
+      expect(llmFailure.payload.providerFailure.statusCode).toBe(429)
+    }
+
+    const runFailure = result.events.find(
+      (event) => event.type === "run.failed"
+    )
+    expect(runFailure?.type).toBe("run.failed")
+    if (runFailure?.type === "run.failed") {
+      expect(runFailure.payload.providerFailure?.code).toBe("rate_limit")
+    }
   })
 })

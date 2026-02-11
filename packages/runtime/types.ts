@@ -58,6 +58,7 @@ export interface RunCompletedPayload {
 export interface RunFailedPayload {
   status: "failed"
   error: string
+  providerFailure?: ProviderFailure
 }
 
 export interface StageStartedPayload {
@@ -74,6 +75,7 @@ export interface StageFailedPayload {
   stageId: string
   stageType: string
   error: string
+  providerFailure?: ProviderFailure
 }
 
 export interface ToolCalledPayload {
@@ -113,6 +115,23 @@ export interface LlmStepCompletedPayload {
 export interface LlmStepFailedPayload {
   stageId: string
   error: string
+  providerFailure: ProviderFailure
+}
+
+export type ProviderFailureCode =
+  | "auth"
+  | "rate_limit"
+  | "timeout"
+  | "network"
+  | "invalid_response"
+  | "provider_unavailable"
+  | "unknown"
+
+export interface ProviderFailure {
+  code: ProviderFailureCode
+  provider: "openai" | "unknown"
+  retryable: boolean
+  statusCode?: number
 }
 
 export interface TraceBreadcrumbPayload {

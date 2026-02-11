@@ -8,6 +8,13 @@ import {
   type WorkflowNodeType,
 } from "./types"
 
+let workflowIdCounter = 0
+
+function generateWorkflowId(): string {
+  workflowIdCounter += 1
+  return `workflow_${Date.now()}_${workflowIdCounter}`
+}
+
 /**
  * Executes to workflow node type.
  */
@@ -28,7 +35,7 @@ export function serializeWorkflowFromCanvas(input: {
   edges: Edge[]
 }): WorkflowDocument {
   const now = new Date().toISOString()
-  const id = input.id ?? `workflow_${Date.now()}`
+  const id = input.id ?? generateWorkflowId()
 
   const nodes: WorkflowNode[] = input.nodes.map((node) => ({
     id: node.id,

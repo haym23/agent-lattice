@@ -34,8 +34,8 @@ function Badge({ children, color, small }) {
         fontFamily: F.mono,
         fontWeight: 600,
         color,
-        backgroundColor: color + "15",
-        border: "1px solid " + color + "30",
+        backgroundColor: `${color}15`,
+        border: `1px solid ${color}30`,
         letterSpacing: "0.02em",
       }}
     >
@@ -84,7 +84,7 @@ function Pre({ children }) {
       style={{
         padding: "12px 14px",
         background: C.surface,
-        border: "1px solid " + C.border,
+        border: `1px solid ${C.border}`,
         borderRadius: 7,
         fontFamily: F.mono,
         fontSize: 11,
@@ -104,8 +104,8 @@ function InfoBox({ title, color, children }) {
     <div
       style={{
         padding: "12px 14px",
-        background: color + "06",
-        border: "1px solid " + color + "18",
+        background: `${color}06`,
+        border: `1px solid ${color}18`,
         borderRadius: 7,
       }}
     >
@@ -267,8 +267,8 @@ function OverviewTab() {
               <div
                 style={{
                   flex: 1,
-                  background: s.color + "08",
-                  border: "1px solid " + s.color + "22",
+                  background: `${s.color}08`,
+                  border: `1px solid ${s.color}22`,
                   borderRadius: 7,
                   padding: "12px 8px",
                   display: "flex",
@@ -386,8 +386,8 @@ function OverviewTab() {
                 alignItems: "center",
                 gap: 6,
                 padding: "6px 10px",
-                background: bt.color + "10",
-                border: "1px solid " + bt.color + "25",
+                background: `${bt.color}10`,
+                border: `1px solid ${bt.color}25`,
                 borderRadius: 6,
               }}
             >
@@ -503,7 +503,7 @@ function FusionTab() {
               style={{
                 padding: "12px 14px",
                 background: C.surface,
-                border: "1px solid " + C.border,
+                border: `1px solid ${C.border}`,
                 borderRadius: 7,
               }}
             >
@@ -693,8 +693,8 @@ function ReasoningTab() {
               key={t.name}
               style={{
                 padding: "12px 14px",
-                background: t.color + "06",
-                border: "1px solid " + t.color + "18",
+                background: `${t.color}06`,
+                border: `1px solid ${t.color}18`,
                 borderRadius: 7,
               }}
             >
@@ -745,7 +745,7 @@ function ReasoningTab() {
                 style={{
                   fontFamily: F.mono,
                   fontSize: 10,
-                  color: t.color + "aa",
+                  color: `${t.color}aa`,
                   background: C.bg,
                   padding: "8px 10px",
                   borderRadius: 4,
@@ -914,8 +914,8 @@ function ReasoningTab() {
               style={{
                 flex: 1,
                 padding: "10px",
-                background: r.color + "06",
-                border: "1px solid " + r.color + "18",
+                background: `${r.color}06`,
+                border: `1px solid ${r.color}18`,
                 borderRadius: 7,
                 textAlign: "center",
               }}
@@ -959,7 +959,7 @@ function ReasoningTab() {
                   marginTop: 2,
                 }}
               >
-                {"Coherence: " + r.coh}
+                {`Coherence: ${r.coh}`}
               </div>
             </div>
           ))}
@@ -984,10 +984,9 @@ function RoutingTab() {
                 setExpanded(expanded === i ? null : i)
               }}
               style={{
-                background: expanded === i ? tier.color + "08" : C.surface,
+                background: expanded === i ? `${tier.color}08` : C.surface,
                 border:
-                  "1px solid " +
-                  (expanded === i ? tier.color + "35" : C.border),
+                  `1px solid ${expanded === i ? `${tier.color}35` : C.border}`,
                 borderRadius: 7,
                 padding: "10px 12px",
                 cursor: "pointer",
@@ -1054,7 +1053,7 @@ function RoutingTab() {
                             fontFamily: F.mono,
                             fontSize: 11,
                             color: tier.color,
-                            background: tier.color + "12",
+                            background: `${tier.color}12`,
                             padding: "2px 7px",
                             borderRadius: 4,
                           }}
@@ -1199,8 +1198,8 @@ function RuntimeTab() {
               key={f.label}
               style={{
                 padding: "10px 12px",
-                background: f.color + "06",
-                border: "1px solid " + f.color + "18",
+                background: `${f.color}06`,
+                border: `1px solid ${f.color}18`,
                 borderRadius: 7,
               }}
             >
@@ -1372,7 +1371,7 @@ function WorkflowTab() {
                   alignItems: "center",
                   gap: 8,
                   background: C.surface,
-                  border: "1px solid " + C.border,
+                  border: `1px solid ${C.border}`,
                   borderRadius: 6,
                   padding: "8px 12px",
                 }}
@@ -1384,8 +1383,8 @@ function WorkflowTab() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    background: bt.color + "18",
-                    border: "1px solid " + bt.color + "30",
+                    background: `${bt.color}18`,
+                    border: `1px solid ${bt.color}30`,
                     borderRadius: 4,
                     fontSize: 11,
                     flexShrink: 0,
@@ -1433,8 +1432,8 @@ function WorkflowTab() {
           style={{
             marginTop: 10,
             padding: "8px 12px",
-            background: C.green + "08",
-            border: "1px solid " + C.green + "20",
+            background: `${C.green}08`,
+            border: `1px solid ${C.green}20`,
             borderRadius: 6,
           }}
         >
@@ -1573,7 +1572,7 @@ export default function App() {
             background: C.surface,
             borderRadius: 7,
             padding: 3,
-            border: "1px solid " + C.border,
+            border: `1px solid ${C.border}`,
             marginBottom: 20,
             flexWrap: "wrap",
           }}
@@ -1588,10 +1587,10 @@ export default function App() {
                 flex: 1,
                 minWidth: 80,
                 padding: "7px 10px",
-                background: tab === t.id ? C.accent + "15" : "transparent",
+                background: tab === t.id ? `${C.accent}15` : "transparent",
                 border:
                   tab === t.id
-                    ? "1px solid " + C.accent + "28"
+                    ? `1px solid ${C.accent}28`
                     : "1px solid transparent",
                 borderRadius: 5,
                 fontFamily: F.mono,

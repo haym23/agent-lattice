@@ -18,7 +18,8 @@
     }
   },
   "files": {
-    "ignoreUnknown": true
+    "ignoreUnknown": true,
+    "includes": ["**/*", "!**/dist", "!**/node_modules"]
   },
   "javascript": {
     "formatter": {

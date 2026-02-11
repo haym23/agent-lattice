@@ -38,7 +38,7 @@ export function createServerApp(
     const rawLastSeq = query?.lastSeq ?? String(headerLastSeq ?? "0")
     const lastSeq = Number.parseInt(rawLastSeq, 10)
 
-    const run = runManager.getRun(runId)
+    const run = await runManager.getRun(runId)
     if (!run) {
       return reply.status(404).send({ error: "run not found" })
     }
@@ -48,7 +48,7 @@ export function createServerApp(
     reply.raw.setHeader("Connection", "keep-alive")
     reply.raw.flushHeaders()
 
-    const unsubscribe = runManager.subscribe(
+    const unsubscribe = await runManager.subscribe(
       runId,
       Number.isNaN(lastSeq) ? 0 : lastSeq,
       (event) => {
