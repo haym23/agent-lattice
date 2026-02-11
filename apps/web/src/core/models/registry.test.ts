@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest"
 
 import { ModelRegistry, validateModelDefinition } from "./registry"
+import claudeIcon from "./icons/claude.svg"
+import openAiIcon from "./icons/openai.svg"
 
 describe("ModelRegistry", () => {
   it("contains Claude and GPT-4o", () => {
@@ -15,7 +17,7 @@ describe("ModelRegistry", () => {
     const claude = registry.get("claude-sonnet")
     expect(claude.displayName).toBe("Claude Sonnet")
     expect(claude.provider).toBe("Anthropic")
-    expect(claude.logoText).toBe("A")
+    expect(claude.icon).toBe(claudeIcon)
     expect(claude.capabilities.toolUse).toBe(true)
   })
 
@@ -30,7 +32,7 @@ describe("ModelRegistry", () => {
         id: "custom",
         displayName: "Custom Model",
         provider: "Custom",
-        logoText: "C",
+        icon: openAiIcon,
         preview: "Custom test model.",
         capabilities: {
           toolUse: false,
@@ -51,7 +53,7 @@ describe("ModelRegistry", () => {
         id: "",
         displayName: "Test",
         provider: "Provider",
-        logoText: "P",
+        icon: "test-icon",
         preview: "Preview",
         capabilities: {
           toolUse: false,
@@ -70,7 +72,7 @@ describe("ModelRegistry", () => {
         id: "test",
         displayName: "Test",
         provider: "Provider",
-        logoText: "P",
+        icon: "test-icon",
         preview: "Preview",
         capabilities: {
           toolUse: false,

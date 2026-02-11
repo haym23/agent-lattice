@@ -38,7 +38,7 @@ const builtInModels: ModelDefinition[] = [
  * Provides model registry behavior.
  */
 export class ModelRegistry {
-  constructor(private readonly models: ModelDefinition[] = builtInModels) {}
+  constructor(private readonly models: ModelDefinition[] = builtInModels) { }
 
   list(): ModelDefinition[] {
     return [...this.models]
@@ -60,7 +60,7 @@ export function validateModelDefinition(model: ModelDefinition): void {
   if (!model.id) throw new Error("model.id is required")
   if (!model.displayName) throw new Error("model.displayName is required")
   if (!model.provider) throw new Error("model.provider is required")
-  if (!model.logoText) throw new Error("model.logoText is required")
+  if (!model.icon) throw new Error("model.icon is required")
   if (!model.preview) throw new Error("model.preview is required")
   if (model.capabilities.contextWindow <= 0) {
     throw new Error("model.capabilities.contextWindow must be positive")
