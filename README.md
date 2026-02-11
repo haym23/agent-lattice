@@ -4,7 +4,7 @@
   <a href="https://github.com/haym23/agent-lattice/stargazers"><img src="https://img.shields.io/github/stars/haym23/agent-lattice" alt="GitHub Stars" /></a>
   <a href="https://github.com/haym23/agent-lattice/actions/workflows/ci.yaml"><img src="https://github.com/haym23/agent-lattice/actions/workflows/ci.yaml/badge.svg?branch=main" alt="CI" /></a>
   <a href="https://codecov.io/gh/haym23/agent-lattice"><img src="https://codecov.io/gh/haym23/agent-lattice/branch/main/graph/badge.svg" alt="Code Coverage" /></a>
-  <a href="https://github.com/haym23/agent-lattice/blob/main/docs/LICENSE.md"><img src="https://img.shields.io/github/license/haym23/agent-lattice" alt="License" /></a>
+  <a href="https://github.com/haym23/agent-lattice/blob/main/LICENSE"><img src="https://img.shields.io/github/license/haym23/agent-lattice" alt="License" /></a>
   <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white" alt="Node.js >=20" /></a>
   <a href="https://pnpm.io/"><img src="https://img.shields.io/badge/pnpm-9-f69220?logo=pnpm&logoColor=white" alt="pnpm 9" /></a>
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white" alt="TypeScript" /></a>
