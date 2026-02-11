@@ -6,9 +6,7 @@ import { PageShell } from "../shared/PageShell"
 export function TemplatesPage(): JSX.Element {
   return (
     <main className="page">
-      <PageShell
-        title="Templates"
-      />
+      <PageShell title="Templates" />
     </main>
   )
 }

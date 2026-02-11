@@ -1,6 +1,6 @@
-import type { ModelDefinition } from "./types"
 import claudeModelIcon from "./icons/claude.svg"
 import openAiModelIcon from "./icons/openai.svg"
+import type { ModelDefinition } from "./types"
 
 const builtInModels: ModelDefinition[] = [
   {
@@ -38,7 +38,7 @@ const builtInModels: ModelDefinition[] = [
  * Provides model registry behavior.
  */
 export class ModelRegistry {
-  constructor(private readonly models: ModelDefinition[] = builtInModels) { }
+  constructor(private readonly models: ModelDefinition[] = builtInModels) {}
 
   list(): ModelDefinition[] {
     return [...this.models]

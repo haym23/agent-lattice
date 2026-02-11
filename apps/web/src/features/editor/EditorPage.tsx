@@ -311,9 +311,7 @@ export function EditorPage(): JSX.Element {
 
   return (
     <main className="page">
-      <PageShell
-        title="Workflow Editor"
-      />
+      <PageShell title="Workflow Editor" />
       <section className="card" style={{ marginTop: 12 }}>
         <header className="workflow-toolbar" role="toolbar">
           <section className="workflow-toolbar-group">

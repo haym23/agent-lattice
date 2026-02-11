@@ -19,7 +19,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**/*", "!**/dist", "!**/node_modules"]
+    "includes": ["**/*", "!**/dist", "!**/node_modules", "!learning"]
   },
   "javascript": {
     "formatter": {

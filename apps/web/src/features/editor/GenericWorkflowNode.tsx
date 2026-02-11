@@ -56,6 +56,7 @@ export function GenericWorkflowNode({
         {executionStatus ? (
           <div
             className={`workflow-node-status workflow-node-status--${executionStatus}`}
+            role="img"
             aria-label={`Node ${statusLabel}`}
             title={statusLabel}
           >

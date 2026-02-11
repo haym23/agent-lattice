@@ -33,9 +33,7 @@ export function DashboardPage(): JSX.Element {
 
   return (
     <main className="page">
-      <PageShell
-        title="Dashboard"
-      />
+      <PageShell title="Dashboard" />
       <section className="card" style={{ marginTop: 12 }}>
         <div
           style={{
