@@ -57,7 +57,7 @@ function normalizeProviderFailure(error: unknown): ProviderFailure {
 
   if (error instanceof SyntaxError) {
     return {
-      code: "invalid_response",
+      code: "malformed_output",
       provider: "unknown",
       retryable: false,
     }

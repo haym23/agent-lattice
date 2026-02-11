@@ -1,5 +1,10 @@
 import cors from "@fastify/cors"
+import { MissingApiKeyError } from "@lattice/llm"
 import Fastify, { type FastifyInstance } from "fastify"
+import {
+  MissingProviderCredentialError,
+  ProviderSelectionError,
+} from "./provider-factory.js"
 import { RunManager, toSseFrame } from "./run-manager.js"
 
 export function createServerApp(
@@ -23,11 +28,22 @@ export function createServerApp(
       return reply.status(400).send({ error: "workflow is required" })
     }
 
-    const runId = await runManager.startRun({
-      workflow: body.workflow,
-      input: body.input,
-    })
-    return { runId }
+    try {
+      const runId = await runManager.startRun({
+        workflow: body.workflow,
+        input: body.input,
+      })
+      return { runId }
+    } catch (error) {
+      if (
+        error instanceof ProviderSelectionError ||
+        error instanceof MissingProviderCredentialError ||
+        error instanceof MissingApiKeyError
+      ) {
+        return reply.status(400).send({ error: error.message })
+      }
+      throw error
+    }
   })
 
   app.get("/runs/:runId/events", async (request, reply) => {

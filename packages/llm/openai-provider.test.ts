@@ -9,19 +9,15 @@ describe("OpenAiProvider", () => {
   })
 
   it("maps model classes and returns normalized response", async () => {
-    const client = {
-      chat: {
-        completions: {
-          create: async (input: { model: string }) => ({
-            model: input.model,
-            choices: [{ message: { content: '{"ok":true}' } }],
-            usage: { prompt_tokens: 10, completion_tokens: 5 },
-          }),
-        },
-      },
-    } as never
-
-    const provider = new OpenAiProvider({ apiKey: "test", client })
+    const provider = new OpenAiProvider({
+      apiKey: "test",
+      modelFactory: ((modelId: string) => ({ modelId })) as never,
+      generateTextFn: async () => ({
+        text: '{"ok":true}',
+        usage: { inputTokens: 10, outputTokens: 5 },
+        response: { modelId: "gpt-4o-mini" },
+      }),
+    })
     const response = await provider.chat({
       modelClass: "SMALL_EXEC",
       messages: [{ role: "user", content: "hello" }],
@@ -34,21 +30,17 @@ describe("OpenAiProvider", () => {
   })
 
   it("converts auth failure to MissingApiKeyError", async () => {
-    const client = {
-      chat: {
-        completions: {
-          create: async () => {
-            const err = new Error("unauthorized") as Error & {
-              status?: number
-            }
-            err.status = 401
-            throw err
-          },
-        },
+    const provider = new OpenAiProvider({
+      apiKey: "test",
+      modelFactory: ((modelId: string) => ({ modelId })) as never,
+      generateTextFn: async () => {
+        const err = new Error("unauthorized") as Error & {
+          statusCode?: number
+        }
+        err.statusCode = 401
+        throw err
       },
-    } as never
-
-    const provider = new OpenAiProvider({ apiKey: "test", client })
+    })
     await expect(
       provider.chat({
         modelClass: "MEDIUM_PLAN",

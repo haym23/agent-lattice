@@ -1,3 +1,4 @@
+import { OpenAiProvider } from "@lattice/llm"
 import type { ExecutionEvent } from "@lattice/runtime"
 import { describe, expect, it } from "vitest"
 import { InMemoryRunEventStore } from "./event-store"
@@ -179,5 +180,74 @@ describe("RunManager", () => {
         return seq === index + 1
       })
     ).toBe(true)
+  })
+
+  it("executes through OpenAiProvider path and emits real usage metadata", async () => {
+    const runManager = new RunManager({
+      providerFactory: () =>
+        new OpenAiProvider({
+          apiKey: "test-key",
+          modelFactory: ((modelId: string) => ({ modelId })) as never,
+          generateTextFn: async () => ({
+            text: JSON.stringify({ ok: true }),
+            usage: { inputTokens: 34, outputTokens: 21 },
+            response: { modelId: "gpt-4o-mini" },
+          }),
+        }),
+    })
+
+    const runId = await runManager.startRun({
+      workflow: makeLinearPromptWorkflow(1),
+    })
+    const events = await collectRunEvents(runManager, runId)
+
+    const llmCompletion = events.find(
+      (event) => event.type === "llm.step.completed"
+    )
+    expect(llmCompletion?.type).toBe("llm.step.completed")
+    if (llmCompletion?.type === "llm.step.completed") {
+      expect(llmCompletion.payload.modelUsed).toBe("gpt-4o-mini")
+      expect(llmCompletion.payload.usage.promptTokens).toBe(34)
+      expect(llmCompletion.payload.usage.completionTokens).toBe(21)
+    }
+
+    expect(events.at(-1)?.type).toBe("run.completed")
+  })
+
+  it("maps provider failures to canonical run events", async () => {
+    const rateLimitError = new Error("Rate limited") as Error & {
+      statusCode: number
+    }
+    rateLimitError.statusCode = 429
+
+    const runManager = new RunManager({
+      providerFactory: () =>
+        new OpenAiProvider({
+          apiKey: "test-key",
+          modelFactory: ((modelId: string) => ({ modelId })) as never,
+          generateTextFn: async () => {
+            throw rateLimitError
+          },
+        }),
+    })
+
+    const runId = await runManager.startRun({
+      workflow: makeLinearPromptWorkflow(1),
+    })
+    const events = await collectRunEvents(runManager, runId)
+    const llmFailure = events.find((event) => event.type === "llm.step.failed")
+    const runFailure = events.find((event) => event.type === "run.failed")
+
+    expect(llmFailure?.type).toBe("llm.step.failed")
+    if (llmFailure?.type === "llm.step.failed") {
+      expect(llmFailure.payload.providerFailure.code).toBe("rate_limit")
+      expect(llmFailure.payload.providerFailure.statusCode).toBe(429)
+    }
+
+    expect(runFailure?.type).toBe("run.failed")
+    if (runFailure?.type === "run.failed") {
+      expect(runFailure.payload.providerFailure?.code).toBe("rate_limit")
+      expect(runFailure.payload.providerFailure?.statusCode).toBe(429)
+    }
   })
 })

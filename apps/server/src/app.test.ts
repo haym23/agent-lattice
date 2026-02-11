@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { createServerApp } from "./app"
 import { RunManager } from "./run-manager"
 
@@ -123,6 +123,10 @@ function parseSsePayload(
 }
 
 describe("server SSE routes", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
   it("returns 404 for unknown run stream", async () => {
     const app = createTestApp()
     const response = await app.inject({
@@ -158,6 +162,23 @@ describe("server SSE routes", () => {
         return event.event === "run.completed" || event.event === "run.failed"
       })
     ).toBe(true)
+
+    await app.close()
+  })
+
+  it("returns explicit provider selection errors for invalid env config", async () => {
+    vi.stubEnv("LATTICE_LLM_PROVIDER", "not-a-provider")
+    const app = createServerApp()
+    const response = await app.inject({
+      method: "POST",
+      url: "/runs",
+      payload: { workflow: makeWorkflow() },
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json<{ error: string }>().error).toContain(
+      "Unsupported LATTICE_LLM_PROVIDER"
+    )
 
     await app.close()
   })
@@ -258,6 +279,28 @@ describe("server SSE routes", () => {
       })
     ).toBe(true)
     expect(events.at(-1)?.event).toBe("run.completed")
+
+    await app.close()
+  })
+
+  it("falls back to full replay when lastSeq query is invalid", async () => {
+    const app = createTestApp()
+    const startResponse = await app.inject({
+      method: "POST",
+      url: "/runs",
+      payload: { workflow: makeWorkflow() },
+    })
+    const { runId } = startResponse.json<{ runId: string }>()
+
+    const eventsResponse = await app.inject({
+      method: "GET",
+      url: `/runs/${runId}/events?lastSeq=not-a-number`,
+    })
+    const events = parseSsePayload(eventsResponse.payload)
+
+    expect(eventsResponse.statusCode).toBe(200)
+    expect(events[0]?.id).toBe(1)
+    expect(events.some((event) => event.event === "run.started")).toBe(true)
 
     await app.close()
   })

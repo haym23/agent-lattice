@@ -12,19 +12,30 @@ interface NodePickerProps {
   nextNodeType: string
   setNextNodeType: (type: string) => void
   addNode: (type: string) => void
+  excludedNodeTypes?: string[]
 }
 
 export function NodePicker({
   nextNodeType,
   setNextNodeType,
   addNode,
+  excludedNodeTypes = [],
 }: NodePickerProps): JSX.Element {
   const [isNodePickerOpen, setIsNodePickerOpen] = useState(false)
-  const nextNodeIcon = isWorkflowNodeType(nextNodeType)
-    ? getNodeTypeIcon(nextNodeType)
+  const availableNodes = nodeCatalog.filter(
+    (node) => !excludedNodeTypes.includes(node.type)
+  )
+  const resolvedNodeType =
+    availableNodes.find((node) => node.type === nextNodeType)?.type ??
+    availableNodes[0]?.type ??
+    nextNodeType
+  const nextNodeIcon = isWorkflowNodeType(resolvedNodeType)
+    ? getNodeTypeIcon(resolvedNodeType)
     : null
   const nextNodeDefinition =
-    nodeCatalog.find((node) => node.type === nextNodeType) ?? nodeCatalog[0]
+    availableNodes.find((node) => node.type === resolvedNodeType) ??
+    availableNodes[0] ??
+    nodeCatalog[0]
 
   return (
     <div className="workflow-toolbar-controls">
@@ -52,8 +63,8 @@ export function NodePicker({
         </button>
         {isNodePickerOpen ? (
           <div className="node-picker-menu" role="listbox">
-            {nodeCatalog.map((node) => {
-              const isSelected = node.type === nextNodeType
+            {availableNodes.map((node) => {
+              const isSelected = node.type === resolvedNodeType
               return (
                 <button
                   key={node.type}
@@ -91,10 +102,10 @@ export function NodePicker({
       </div>
       <button
         type="button"
-        onClick={() => addNode(nextNodeType)}
+        onClick={() => addNode(resolvedNodeType)}
         className="workflow-btn workflow-btn--primary"
       >
-        Add Node
+        Add
       </button>
     </div>
   )

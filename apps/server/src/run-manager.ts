@@ -3,6 +3,10 @@ import type { LlmProvider } from "@lattice/llm"
 import type { ExecutionEvent } from "@lattice/runtime"
 import { createRunner, serializeStreamEvent } from "@lattice/runtime"
 import {
+  type AiSdkEvent,
+  createAiSdkEventMapper,
+} from "./ai-sdk-event-mapper.js"
+import {
   InMemoryRunEventStore,
   type RunEventStore,
   type RunStatus,
@@ -101,6 +105,60 @@ export class RunManager {
       })
   }
 
+  private normalizeProviderLifecycleEvent(
+    event: ExecutionEvent,
+    mapAiSdkEvent: (event: AiSdkEvent) => ExecutionEvent
+  ): ExecutionEvent {
+    if (event.type === "llm.step.started") {
+      const mapped = mapAiSdkEvent({
+        type: "step-start",
+        stageId: event.payload.stageId,
+        modelClass: event.payload.modelClass,
+        prompt: event.payload.prompt.value,
+      })
+      return {
+        ...event,
+        type: mapped.type,
+        payload: mapped.payload,
+      }
+    }
+
+    if (event.type === "llm.step.completed") {
+      const mapped = mapAiSdkEvent({
+        type: "step-complete",
+        stageId: event.payload.stageId,
+        modelUsed: event.payload.modelUsed,
+        usage: {
+          promptTokens: event.payload.usage.promptTokens,
+          completionTokens: event.payload.usage.completionTokens,
+        },
+      })
+      return {
+        ...event,
+        type: mapped.type,
+        payload: mapped.payload,
+      }
+    }
+
+    if (event.type === "llm.step.failed") {
+      const mapped = mapAiSdkEvent({
+        type: "step-fail",
+        stageId: event.payload.stageId,
+        error: event.payload.error,
+        code: event.payload.providerFailure.code,
+        statusCode: event.payload.providerFailure.statusCode,
+        provider: event.payload.providerFailure.provider,
+      })
+      return {
+        ...event,
+        type: mapped.type,
+        payload: mapped.payload,
+      }
+    }
+
+    return event
+  }
+
   private async getOrSyncRun(runId: string): Promise<RunRecord | undefined> {
     const inMemory = this.runs.get(runId)
     if (inMemory) {
@@ -127,6 +185,7 @@ export class RunManager {
     const runner = this.createRunnerWithProvider()
     const program = lowerToExecIR(request.workflow)
     const runId = crypto.randomUUID()
+    const mapAiSdkEvent = createAiSdkEventMapper(runId)
     await this.eventStore.createRun(runId)
 
     const run: RunRecord = {
@@ -146,7 +205,11 @@ export class RunManager {
         {
           runId,
           onEvent: (event) => {
-            this.enqueueRunEvent(runId, event)
+            const normalizedEvent = this.normalizeProviderLifecycleEvent(
+              event,
+              mapAiSdkEvent
+            )
+            this.enqueueRunEvent(runId, normalizedEvent)
           },
         }
       )

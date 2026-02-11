@@ -9,9 +9,9 @@
   "scripts": {
     "dev": "pnpm -r dev",
     "build": "pnpm -r build",
-    "check": "biome check .",
     "lint": "biome lint .",
     "format": "biome format .",
+    "check": "biome check .",
     "fix": "biome check . --write",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",

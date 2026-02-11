@@ -11,6 +11,11 @@ import { PageShell } from "../shared/PageShell"
 import { CompilePreviewDialog } from "./CompilePreviewDialog"
 import { ExecutionPanel } from "./execution/ExecutionPanel"
 import { NodePicker } from "./header/NodePicker"
+import githubMcpIcon from "./icons/nodes/github.svg"
+import googleMcpIcon from "./icons/nodes/google.svg"
+import notionMcpIcon from "./icons/nodes/notion.svg"
+import slackMcpIcon from "./icons/nodes/slack.svg"
+import openAiModelIcon from "./icons/nodes/openai.svg"
 import { getNodeTypeIcon } from "./icons/nodeTypeIconMap"
 import { WorkflowCanvas } from "./WorkflowCanvas"
 import {
@@ -37,6 +42,35 @@ interface EditorSnapshot {
     targetHandle?: string
   }>
 }
+
+const mcpPlaceholderApps = [
+  {
+    id: "github",
+    name: "GitHub",
+    details: "Pull requests, issues, and repo data",
+    icon: githubMcpIcon,
+  },
+  {
+    id: "slack",
+    name: "Slack",
+    details: "Channels, messages, and workspace context",
+    icon: slackMcpIcon,
+  },
+  {
+    id: "notion",
+    name: "Notion",
+    details: "Docs, project pages, and databases",
+    icon: notionMcpIcon,
+  },
+  {
+    id: "google-drive",
+    name: "Google Drive",
+    details: "Files, folders, and document search",
+    icon: googleMcpIcon,
+  },
+]
+
+type McpPlaceholderApp = (typeof mcpPlaceholderApps)[number]
 
 function buildEditorSnapshot(input: {
   name: string
@@ -91,6 +125,10 @@ export function EditorPage(): JSX.Element {
   const [isCompiling, setIsCompiling] = useState(false)
   const [compileError, setCompileError] = useState<string | null>(null)
   const [nextNodeType, setNextNodeType] = useState("subAgent")
+  const [selectedMcpAppId, setSelectedMcpAppId] = useState(
+    mcpPlaceholderApps[0].id
+  )
+  const [isMcpPickerOpen, setIsMcpPickerOpen] = useState(false)
   const [selectedNodeLabel, setSelectedNodeLabel] = useState("")
   const [selectedNodeConfigJson, setSelectedNodeConfigJson] = useState("{}")
   const [configError, setConfigError] = useState<string | null>(null)
@@ -119,6 +157,9 @@ export function EditorPage(): JSX.Element {
 
     return getNodeTypeIcon(selectedNodeType)
   }, [selectedNodeType])
+  const selectedMcpApp: McpPlaceholderApp =
+    mcpPlaceholderApps.find((app) => app.id === selectedMcpAppId) ??
+    mcpPlaceholderApps[0]
 
   useEffect(() => {
     if (!selectedNode) {
@@ -223,6 +264,19 @@ export function EditorPage(): JSX.Element {
     )
   }
 
+  const handleAddMcpNode = () => {
+    addNode("mcp")
+    updateSelectedNode({
+      label: `MCP: ${selectedMcpApp.name}`,
+      config: {
+        mode: "manualParameterConfig",
+        serverId: selectedMcpApp.id,
+        toolName: "",
+        outputPorts: 1,
+      },
+    })
+  }
+
   const handleApplyNodeChanges = () => {
     if (!selectedNode) return
 
@@ -255,7 +309,81 @@ export function EditorPage(): JSX.Element {
               nextNodeType={nextNodeType}
               setNextNodeType={setNextNodeType}
               addNode={addNode}
+              excludedNodeTypes={["mcp"]}
             />
+          </section>
+          <section className="workflow-toolbar-group workflow-toolbar-group--mcp">
+            <h3 className="workflow-toolbar-title">MCP</h3>
+            <div className="workflow-toolbar-controls">
+              <div className="node-picker workflow-mcp-picker">
+                <button
+                  type="button"
+                  className="workflow-input workflow-input--button node-picker-trigger"
+                  aria-haspopup="listbox"
+                  aria-expanded={isMcpPickerOpen}
+                  onClick={() => setIsMcpPickerOpen((prev) => !prev)}
+                >
+                  <img
+                    src={selectedMcpApp.icon ?? getNodeTypeIcon("mcp")}
+                    alt=""
+                    aria-hidden="true"
+                    width={18}
+                    height={18}
+                  />
+                  <span className="node-picker-trigger-labels">
+                    <span>{selectedMcpApp.name}</span>
+                    <span>{selectedMcpApp.details}</span>
+                  </span>
+                </button>
+                {isMcpPickerOpen ? (
+                  <div className="node-picker-menu" role="listbox">
+                    {mcpPlaceholderApps.map((app) => {
+                      const isSelected = app.id === selectedMcpApp.id
+                      return (
+                        <button
+                          key={app.id}
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected}
+                          className={
+                            isSelected
+                              ? "node-picker-option node-picker-option--selected"
+                              : "node-picker-option"
+                          }
+                          onClick={() => {
+                            setSelectedMcpAppId(app.id)
+                            setIsMcpPickerOpen(false)
+                          }}
+                        >
+                          <img
+                            src={app.icon ?? getNodeTypeIcon("mcp")}
+                            alt=""
+                            aria-hidden="true"
+                            width={18}
+                            height={18}
+                          />
+                          <span className="node-picker-option-labels">
+                            <span>{app.name}</span>
+                            <span>{app.details}</span>
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                onClick={handleAddMcpNode}
+                className="workflow-btn workflow-btn--primary"
+              >
+                Add
+              </button>
+            </div>
+            <p className="workflow-mcp-note">
+              Placeholder MCP app catalog. This will scale as we add more
+              connectors.
+            </p>
           </section>
           <section className="workflow-toolbar-group">
             <h3 className="workflow-toolbar-title">Workflow</h3>
@@ -269,7 +397,7 @@ export function EditorPage(): JSX.Element {
                 {persistenceBadge}
               </span>
               <input
-                className="workflow-input"
+                className="workflow-input workflow-input--name"
                 value={workflowName}
                 onChange={(event) => setWorkflowName(event.target.value)}
                 aria-label="workflow-name"
@@ -289,14 +417,16 @@ export function EditorPage(): JSX.Element {
                 disabled={isCompiling}
                 className="workflow-btn workflow-btn--accent"
               >
-                {isCompiling ? "Compiling..." : "Compile"}
+                {isCompiling ? "Building..." : "Build"}
               </button>
             </div>
             {compileError ? (
               <p style={{ margin: 0, color: "#b91c1c", fontSize: 11 }}>
                 Last compile failed: {compileError}
               </p>
-            ) : ""}
+            ) : (
+              ""
+            )}
           </section>
           <section className="workflow-toolbar-group workflow-toolbar-group--compile">
             <h3 className="workflow-toolbar-title">Compile</h3>
@@ -310,6 +440,8 @@ export function EditorPage(): JSX.Element {
                     key={model.id}
                     type="button"
                     aria-pressed={isSelected}
+                    aria-label={`${model.displayName} (${model.provider})`}
+                    title={`${model.displayName} (${model.provider})`}
                     onClick={() => setModelId(model.id)}
                     className={
                       isSelected
@@ -317,13 +449,22 @@ export function EditorPage(): JSX.Element {
                         : "workflow-model-option"
                     }
                   >
-                    <span
-                      className="workflow-model-logo"
-                      aria-hidden="true"
-                      style={{ backgroundColor: logoBackground }}
-                    >
-                      {model.logoText}
-                    </span>
+                    {model.provider === "OpenAI" ? (
+                      <img
+                        src={openAiModelIcon}
+                        alt=""
+                        aria-hidden="true"
+                        className="workflow-model-logo workflow-model-logo--image"
+                      />
+                    ) : (
+                      <span
+                        className="workflow-model-logo"
+                        aria-hidden="true"
+                        style={{ backgroundColor: logoBackground }}
+                      >
+                        {model.logoText}
+                      </span>
+                    )}
                     <span className="workflow-model-meta">
                       <span className="workflow-model-name">
                         {model.displayName}

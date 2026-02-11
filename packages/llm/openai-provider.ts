@@ -1,4 +1,5 @@
-import OpenAI from "openai"
+import { createOpenAI } from "@ai-sdk/openai"
+import { generateText } from "ai"
 
 import {
   type LlmProvider,
@@ -15,16 +16,45 @@ const MODEL_MAP = {
 
 interface OpenAiProviderOptions {
   apiKey?: string
-  client?: OpenAI
+  generateTextFn?: GenerateTextFn
+  modelFactory?: OpenAiModelFactory
 }
+
+type OpenAiModelFactory = ReturnType<typeof createOpenAI>
+
+interface GenerateTextInput {
+  model: unknown
+  temperature?: number
+  messages: LlmRequest["messages"]
+  providerOptions?: Record<string, unknown>
+}
+
+interface GenerateTextResult {
+  text?: string
+  usage?: {
+    inputTokens?: number
+    outputTokens?: number
+  }
+  response?: {
+    modelId?: string
+  }
+}
+
+type GenerateTextFn = (input: GenerateTextInput) => Promise<GenerateTextResult>
 
 /**
  * Reads the OpenAI API key from Vite environment variables.
  */
 function readOpenAiApiKey(): string | undefined {
-  if (typeof process !== "undefined" && process.env) {
+  const serverEnv = (
+    globalThis as {
+      process?: { env?: Record<string, string | undefined> }
+    }
+  ).process?.env
+
+  if (serverEnv) {
     const serverApiKey =
-      process.env.OPENAI_API_KEY ?? process.env.VITE_OPENAI_API_KEY
+      serverEnv.OPENAI_API_KEY ?? serverEnv.VITE_OPENAI_API_KEY
     if (serverApiKey) {
       return serverApiKey
     }
@@ -44,51 +74,57 @@ function sleep(ms: number): Promise<void> {
  * Provides open ai provider behavior.
  */
 export class OpenAiProvider implements LlmProvider {
-  private readonly client: OpenAI
+  private readonly generateTextFn: GenerateTextFn
+  private readonly modelFactory: OpenAiModelFactory
 
   constructor(options: OpenAiProviderOptions = {}) {
     const apiKey = options.apiKey ?? readOpenAiApiKey()
     if (!apiKey) {
       throw new MissingApiKeyError()
     }
-    this.client =
-      options.client ??
-      new OpenAI({
-        apiKey,
-        dangerouslyAllowBrowser: true,
-      })
+    this.modelFactory = options.modelFactory ?? createOpenAI({ apiKey })
+    this.generateTextFn =
+      options.generateTextFn ?? (generateText as GenerateTextFn)
   }
 
   async chat(request: LlmRequest): Promise<LlmResponse> {
     const model = MODEL_MAP[request.modelClass]
     for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
-        const response = await this.client.chat.completions.create({
-          model,
+        const response = await this.generateTextFn({
+          model: this.modelFactory(model),
           temperature: request.temperature,
           messages: request.messages,
-          response_format: request.responseFormat
-            ? { type: "json_object" }
+          providerOptions: request.responseFormat
+            ? {
+                openai: {
+                  response_format: { type: "json_object" },
+                },
+              }
             : undefined,
         })
-        const content = response.choices[0]?.message?.content ?? ""
+        const content = response.text ?? ""
         return {
           content,
           parsed:
             request.responseFormat && content ? JSON.parse(content) : undefined,
           usage: {
-            promptTokens: response.usage?.prompt_tokens ?? 0,
-            completionTokens: response.usage?.completion_tokens ?? 0,
+            promptTokens: response.usage?.inputTokens ?? 0,
+            completionTokens: response.usage?.outputTokens ?? 0,
           },
-          modelUsed: response.model ?? model,
+          modelUsed: response.response?.modelId ?? model,
         }
       } catch (error) {
-        const status = (error as { status?: number }).status
-        if (status === 429 && attempt < 2) {
+        const status = (error as { status?: number; statusCode?: number })
+          .status
+        const statusCode =
+          (error as { status?: number; statusCode?: number }).statusCode ??
+          status
+        if (statusCode === 429 && attempt < 2) {
           await sleep(50 * 2 ** attempt)
           continue
         }
-        if (status === 401) {
+        if (statusCode === 401 || statusCode === 403) {
           throw new MissingApiKeyError()
         }
         throw error

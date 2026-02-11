@@ -10,6 +10,7 @@ This app provides the backend execution and streaming layer for workflow transpa
 - Supports short in-memory replay on reconnect using sequence-based resume.
 - Applies redaction-by-default for UI-facing sensitive payload areas.
 - Includes mapping helpers for converting AI SDK-style events into the shared workflow event model.
+- Uses Vercel AI SDK (`ai` + `@ai-sdk/openai`) for runtime OpenAI model calls.
 
 ## Endpoints
 
@@ -18,10 +19,45 @@ This app provides the backend execution and streaming layer for workflow transpa
 - `POST /runs`
   - Starts a run from a workflow payload.
   - Returns `{ "runId": "..." }`.
+  - Returns `400` for provider configuration issues (unsupported provider value or missing credentials).
 - `GET /runs/:runId/events`
   - Streams `text/event-stream` events for a run.
   - SSE framing includes `id`, `event`, and `data`.
   - Accepts `lastSeq` query param (or `Last-Event-ID`) to replay missed buffered events.
+
+## Provider selection contract
+
+Provider selection is controlled by environment variables and resolves in this order:
+
+- `LATTICE_LLM_PROVIDER`
+  - Supported values: `openai`, `mock`.
+  - If unset, defaults to `openai`.
+  - Any other value is rejected with an explicit configuration error.
+- OpenAI credentials
+  - Required when provider resolves to `openai`.
+  - Accepted env vars: `OPENAI_API_KEY` or `VITE_OPENAI_API_KEY`.
+  - Runtime calls are executed through Vercel AI SDK, but credential names stay the same.
+  - If missing, run start fails with an explicit credential error.
+
+Examples:
+
+- Real provider path (default):
+  - `OPENAI_API_KEY=...`
+- Mock local path:
+  - `LATTICE_LLM_PROVIDER=mock`
+
+## Provider event mapping
+
+Run events normalize provider lifecycle output through the AI SDK mapping pipeline before SSE fan-out:
+
+- `llm.step.started` carries redacted prompt metadata.
+- `llm.step.completed` carries real usage values (`modelUsed`, `promptTokens`, `completionTokens`).
+- `llm.step.failed` normalizes provider failures to canonical codes:
+  - `auth`
+  - `rate_limit`
+  - `timeout`
+  - `malformed_output`
+  - `unknown`
 
 ## Event model
 

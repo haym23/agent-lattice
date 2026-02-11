@@ -186,9 +186,23 @@ UI features for the main site. Includes all React UI content. Routes for feature
 ### Good MCPs
 
 - **Google Maps, Gmail, Calendar, etc:** Connect to any Google app
+- **Slack:** Parse messages
+- **Notion:** Note taking, to do lists, planning
+- **Github:** Interacting with code repos
 - **Reddit:** Search through Reddit quickly for ideas
-- **Sleeper:** Fantasy football
 - **Context7:** Code formatting and standards
+- **Playwright:** Web tools, browsing, crawling
+- Future:
+  - **Blender:** 3D graphic rendering
+  - **Sleeper:** Fantasy football
+- Still need:
+  - Meeting summarizer
+  - Slide show maker
+  - ResumeTitan
+  - Voice generation
+  - Video generation
+  - Photo generation
+  - Good web scraper/crawler
 
 ---
 

@@ -123,7 +123,7 @@ export type ProviderFailureCode =
   | "rate_limit"
   | "timeout"
   | "network"
-  | "invalid_response"
+  | "malformed_output"
   | "provider_unavailable"
   | "unknown"
 

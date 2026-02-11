@@ -15,17 +15,17 @@ Ship a real execution path with durable event replay, then remove workflow persi
 Owner: Backend/Runtime  
 Priority: P0
 
-- [ ] Define provider-selection contract (`env`, fallback behavior, explicit errors).
-- [ ] Replace local stub provider in server run path with real provider wiring.
-- [ ] Route provider events through AI SDK mapping pipeline.
-- [ ] Populate real usage fields (`modelUsed`, `promptTokens`, `completionTokens`) in event payloads.
-- [ ] Map provider failures to canonical workflow events (timeout, auth, rate limit, malformed output).
-- [ ] Add integration test for end-to-end real-provider execution (mocked network allowed in CI).
+- [x] Define provider-selection contract (`env`, fallback behavior, explicit errors).
+- [x] Replace local stub provider in server run path with real provider wiring.
+- [x] Route provider events through AI SDK mapping pipeline.
+- [x] Populate real usage fields (`modelUsed`, `promptTokens`, `completionTokens`) in event payloads.
+- [x] Map provider failures to canonical workflow events (timeout, auth, rate limit, malformed output).
+- [x] Add integration test for end-to-end real-provider execution (mocked network allowed in CI).
 
 Done when:
 
-- [ ] End-to-end run uses real provider path.
-- [ ] Streamed LLM events contain non-placeholder usage values.
+- [x] End-to-end run uses real provider path.
+- [x] Streamed LLM events contain non-placeholder usage values.
 
 ---
 

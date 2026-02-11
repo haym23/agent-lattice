@@ -4,10 +4,13 @@ import {
   lowerToExecIR,
 } from "@lattice/compiler"
 import type { LlmWriteExecNode } from "@lattice/ir"
-import { MockLlmProvider, OpenAiProvider } from "@lattice/llm"
 import { createDefaultPromptRegistry } from "@lattice/prompts"
-import type { ExecutionEvent, ExecutionResult } from "@lattice/runtime"
-import { createRunner, PromptCompiler } from "@lattice/runtime"
+import type {
+  ExecutionEvent,
+  ExecutionResult,
+  WorkflowStreamEventType,
+} from "@lattice/runtime"
+import { PromptCompiler } from "@lattice/runtime"
 import { IndexedDbWorkflowRepository } from "../adapters/persistence/indexeddbWorkflowRepository"
 import { ModelRegistry } from "../core/models/registry"
 import type { ModelDefinition } from "../core/models/types"
@@ -18,14 +21,65 @@ import type {
   PlatformAdapter,
 } from "./platform-adapter"
 
+const TERMINAL_EVENT_TYPES = new Set<WorkflowStreamEventType>([
+  "run.completed",
+  "run.failed",
+])
+
+const WORKFLOW_STREAM_EVENT_TYPES: WorkflowStreamEventType[] = [
+  "run.started",
+  "run.completed",
+  "run.failed",
+  "stage.started",
+  "stage.completed",
+  "stage.failed",
+  "tool.called",
+  "tool.result",
+  "tool.failed",
+  "llm.step.started",
+  "llm.step.completed",
+  "llm.step.failed",
+  "trace.breadcrumb",
+]
+
+const DEFAULT_STATE = {
+  $vars: {},
+  $tmp: {},
+  $ctx: {},
+  $in: {},
+}
+
+interface EventSourceLike {
+  addEventListener(
+    type: string,
+    listener: (event: MessageEvent<string>) => void
+  ): void
+  close(): void
+  onerror: ((event: Event) => void) | null
+}
+
+interface WebPlatformAdapterOptions {
+  serverBaseUrl?: string
+  fetchImpl?: typeof fetch
+  eventSourceFactory?: (url: string) => EventSourceLike
+}
+
 /**
- * Reads the OpenAI API key from Vite environment variables.
+ * Reads the server API URL from Vite environment variables.
  */
-function readOpenAiApiKey(): string | undefined {
+function readServerBaseUrlFromEnv(): string | undefined {
   const meta = import.meta as unknown as {
     env?: Record<string, string | undefined>
   }
-  return meta.env?.VITE_OPENAI_API_KEY
+  return meta.env?.VITE_SERVER_BASE_URL
+}
+
+function normalizeServerBaseUrl(baseUrl: string): string {
+  return baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl
+}
+
+function createDefaultEventSource(url: string): EventSourceLike {
+  return new EventSource(url)
 }
 
 /**
@@ -35,6 +89,20 @@ export class WebPlatformAdapter implements PlatformAdapter {
   private readonly repository = new IndexedDbWorkflowRepository()
   private readonly modelRegistry = new ModelRegistry()
   private readonly listeners = new Set<ExecutionListener>()
+  private readonly serverBaseUrl: string
+  private readonly fetchImpl: typeof fetch
+  private readonly eventSourceFactory: (url: string) => EventSourceLike
+
+  constructor(options: WebPlatformAdapterOptions = {}) {
+    this.serverBaseUrl = normalizeServerBaseUrl(
+      options.serverBaseUrl ??
+        readServerBaseUrlFromEnv() ??
+        "http://localhost:8787"
+    )
+    this.fetchImpl = options.fetchImpl ?? fetch
+    this.eventSourceFactory =
+      options.eventSourceFactory ?? createDefaultEventSource
+  }
 
   async saveWorkflow(id: string, data: WorkflowDocument): Promise<void> {
     await this.repository.save({
@@ -101,23 +169,25 @@ export class WebPlatformAdapter implements PlatformAdapter {
     workflow: WorkflowDocument,
     input: Record<string, unknown> = {}
   ): Promise<ExecutionResult> {
-    const program = lowerToExecIR(workflow)
-    const apiKey = readOpenAiApiKey()
-    const provider = apiKey
-      ? new OpenAiProvider({ apiKey })
-      : new MockLlmProvider()
-    const runner = createRunner(provider)
-    const result = await runner.execute(
-      program,
-      input,
-      {},
-      {
-        onEvent: (event) => {
-          this.emit(event)
-        },
+    const runResponse = await this.fetchImpl(`${this.serverBaseUrl}/runs`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ workflow, input }),
+    })
+
+    if (!runResponse.ok) {
+      const failure = (await runResponse
+        .json()
+        .catch(() => ({ error: "Failed to start workflow run" }))) as {
+        error?: string
       }
-    )
-    return result
+      throw new Error(failure.error ?? "Failed to start workflow run")
+    }
+
+    const startPayload = (await runResponse.json()) as { runId: string }
+    return this.streamRunEvents(startPayload.runId)
   }
 
   subscribeToExecution(listener: ExecutionListener): () => void {
@@ -139,6 +209,59 @@ export class WebPlatformAdapter implements PlatformAdapter {
     for (const listener of this.listeners) {
       listener(event)
     }
+  }
+
+  private streamRunEvents(runId: string): Promise<ExecutionResult> {
+    return new Promise((resolve, reject) => {
+      const eventSource = this.eventSourceFactory(
+        `${this.serverBaseUrl}/runs/${runId}/events`
+      )
+      const events: ExecutionEvent[] = []
+
+      const handleEvent = (messageEvent: MessageEvent<string>) => {
+        let event: ExecutionEvent
+        try {
+          event = JSON.parse(messageEvent.data) as ExecutionEvent
+        } catch {
+          eventSource.close()
+          reject(new Error("Received malformed SSE event payload from server"))
+          return
+        }
+        events.push(event)
+        this.emit(event)
+
+        if (!TERMINAL_EVENT_TYPES.has(event.type)) {
+          return
+        }
+
+        eventSource.close()
+        resolve({
+          status: event.type === "run.completed" ? "completed" : "failed",
+          runId,
+          finalState: DEFAULT_STATE,
+          events: [...events].sort((left, right) => left.seq - right.seq),
+          error:
+            event.type === "run.failed"
+              ? new Error(
+                  "error" in event.payload
+                    ? event.payload.error
+                    : "Workflow run failed"
+                )
+              : undefined,
+        })
+      }
+
+      for (const eventType of WORKFLOW_STREAM_EVENT_TYPES) {
+        eventSource.addEventListener(eventType, handleEvent)
+      }
+
+      eventSource.onerror = () => {
+        eventSource.close()
+        reject(
+          new Error("SSE connection failed while streaming workflow events")
+        )
+      }
+    })
   }
 
   private buildRuntimePromptPreviewFile(
