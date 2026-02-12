@@ -10,7 +10,7 @@ describe("PromptCompiler", () => {
       id: "n1",
       op: "LLM_WRITE",
       model_class: "SMALL_EXEC",
-      prompt_template: "llm-write-v1",
+      prompt_template: "prompt",
       output_schema: { type: "object" },
     }
     const request = compiler.compile(node, {
@@ -28,7 +28,7 @@ describe("PromptCompiler", () => {
       id: "n1",
       op: "LLM_WRITE",
       model_class: "SMALL_EXEC",
-      prompt_template: "llm-write-v1",
+      prompt_template: "prompt",
       output_schema: { type: "object" },
     }
     const request = compiler.compile(

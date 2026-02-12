@@ -1,12 +1,15 @@
 import { createOpenAI } from "@ai-sdk/openai"
 import { generateText } from "ai"
 
+import { createLogger } from "./logger"
 import {
   type LlmProvider,
   type LlmRequest,
   type LlmResponse,
   MissingApiKeyError,
 } from "./types"
+
+const logger = createLogger("llm:openai")
 
 const MODEL_MAP = {
   SMALL_EXEC: "gpt-4o-mini",
@@ -80,6 +83,7 @@ export class OpenAiProvider implements LlmProvider {
   constructor(options: OpenAiProviderOptions = {}) {
     const apiKey = options.apiKey ?? readOpenAiApiKey()
     if (!apiKey) {
+      logger.error("openai.api_key.missing")
       throw new MissingApiKeyError()
     }
     this.modelFactory = options.modelFactory ?? createOpenAI({ apiKey })
@@ -89,6 +93,12 @@ export class OpenAiProvider implements LlmProvider {
 
   async chat(request: LlmRequest): Promise<LlmResponse> {
     const model = MODEL_MAP[request.modelClass]
+    logger.debug("openai.request.start", {
+      model,
+      temperature: request.temperature,
+      messageCount: request.messages.length,
+      responseFormat: Boolean(request.responseFormat),
+    })
     for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
         const response = await this.generateTextFn({
@@ -97,13 +107,23 @@ export class OpenAiProvider implements LlmProvider {
           messages: request.messages,
           providerOptions: request.responseFormat
             ? {
-                openai: {
-                  response_format: { type: "json_object" },
-                },
-              }
+              openai: {
+                response_format: { type: "json_object" },
+              },
+            }
             : undefined,
         })
         const content = response.text ?? ""
+        logger.debug("openai.request.response", {
+          contentPreview: content.slice(0, 100),
+          contentLength: content.length,
+          modelUsed: response.response?.modelId ?? model,
+        })
+        logger.debug("openai.request.complete", {
+          modelUsed: response.response?.modelId ?? model,
+          inputTokens: response.usage?.inputTokens ?? 0,
+          outputTokens: response.usage?.outputTokens ?? 0,
+        })
         return {
           content,
           parsed:
@@ -121,15 +141,25 @@ export class OpenAiProvider implements LlmProvider {
           (error as { status?: number; statusCode?: number }).statusCode ??
           status
         if (statusCode === 429 && attempt < 2) {
+          logger.info("openai.request.retry", {
+            attempt: attempt + 1,
+            statusCode,
+          })
           await sleep(50 * 2 ** attempt)
           continue
         }
         if (statusCode === 401 || statusCode === 403) {
+          logger.error("openai.request.unauthorized", { statusCode })
           throw new MissingApiKeyError()
         }
+        logger.warn("openai.request.failed", {
+          attempt: attempt + 1,
+          statusCode,
+        })
         throw error
       }
     }
+    logger.error("openai.request.exhausted", { model })
     throw new Error("OpenAI request failed after retries")
   }
 }

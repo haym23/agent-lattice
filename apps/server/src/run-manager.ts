@@ -227,6 +227,7 @@ export class RunManager {
           promptTokens: payload.usage.promptTokens,
           completionTokens: payload.usage.completionTokens,
         },
+        response: payload.response?.value,
       })
       return {
         ...event,

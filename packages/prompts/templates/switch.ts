@@ -1,7 +1,7 @@
 import type { PromptTemplate } from "../types"
 
-export const nodeSwitchV1Template: PromptTemplate = {
-  id: "node-switch-v1",
+export const switchTemplate: PromptTemplate = {
+  id: "switch",
   version: "1",
   systemPrompt:
     "You are a deterministic routing evaluator for a Switch workflow node. Map input to one branch label and return strict JSON only.",

@@ -1,16 +1,4 @@
-# Node Types
-
-This document describes every node type currently available in the workflow editor.
-
-Each section includes:
-- Description: what the node does
-- Invocation: how to add/configure it in the UI
-- Example: minimal workflow node object
-
-## Table of Contents
-
 - [Node Types](#node-types)
-  - [Table of Contents](#table-of-contents)
   - [Start (`start`)](#start-start)
   - [End (`end`)](#end-end)
   - [Prompt (`prompt`)](#prompt-prompt)
@@ -19,9 +7,7 @@ Each section includes:
   - [If/Else (`ifElse`)](#ifelse-ifelse)
   - [Switch (`switch`)](#switch-switch)
   - [Skill (`skill`)](#skill-skill)
-  - [MCP Tool (`mcp`)](#mcp-tool-mcp)
   - [Flow (`flow`)](#flow-flow)
-  - [Codex (`codex`)](#codex-codex)
   - [Legacy Branch (`branch`)](#legacy-branch-branch)
   - [🔬 Researched Node Types (Not Yet Implemented)](#-researched-node-types-not-yet-implemented)
     - [Parallel Execution (`parallel`)](#parallel-execution-parallel)
@@ -36,6 +22,16 @@ Each section includes:
   - [Required Fields](#required-fields)
   - [Structured Data Fields](#structured-data-fields)
   - [Source of Truth](#source-of-truth)
+- [MCP Tools (`mcp`)](#mcp-tools-mcp)
+
+# Node Types
+
+This document describes every node type currently available in the workflow editor.
+
+Each section includes:
+- Description: what the node does
+- Invocation: how to add/configure it in the UI
+- Example: minimal workflow node object
 
 ## Start (`start`)
 
@@ -170,8 +166,8 @@ Example:
 ## If/Else (`ifElse`)
 
 Description:
-- Two-way branching node.
-- Always exactly 2 branches and 2 outputs.
+- Conditional branching node.
+- Always exactly 2 branches and 1 output.
 
 Invocation:
 - Click `If/Else` in Node Palette.
@@ -256,45 +252,6 @@ Example:
 }
 ```
 
-## MCP Tool (`mcp`)
-
-Description:
-- Calls an MCP server tool with typed parameters.
-- Supports manual parameter config and AI-assisted config modes.
-
-Invocation:
-- Click `MCP` in Node Palette to open MCP Node dialog.
-- Pick server, tool, and mode (`manualParameterConfig`, `aiParameterConfig`, or `aiToolSelection`).
-- For generated workflows, prefer `manualParameterConfig`.
-
-Example:
-
-```json
-{
-  "id": "mcp-1730000000007",
-  "type": "mcp",
-  "name": "Open URL",
-  "position": { "x": 300, "y": 250 },
-  "data": {
-    "mode": "manualParameterConfig",
-    "serverId": "playwright",
-    "toolName": "playwright_navigate",
-    "toolDescription": "Navigate browser to URL",
-    "parameters": [
-      {
-        "name": "url",
-        "type": "string",
-        "description": "Target URL",
-        "required": true
-      }
-    ],
-    "parameterValues": { "url": "https://example.com" },
-    "validationStatus": "valid",
-    "outputPorts": 1
-  }
-}
-```
-
 ## Flow (`flow`)
 
 Description:
@@ -319,38 +276,6 @@ Example:
     "label": "Validation Flow",
     "description": "Validate request payload",
     "outputPorts": 1
-  }
-}
-```
-
-## Codex (`codex`)
-
-Description:
-- Represents an OpenAI Codex CLI agent step.
-- Supports fixed or AI-generated prompt mode.
-
-Invocation:
-- Enable Codex beta feature.
-- Click `Codex` in Node Palette to open Codex Node dialog.
-- Configure prompt mode, model, reasoning level, and sandbox.
-
-Example:
-
-```json
-{
-  "id": "codex-1730000000009",
-  "type": "codex",
-  "name": "Codex Refactor",
-  "position": { "x": 320, "y": 220 },
-  "data": {
-    "label": "Codex Refactor",
-    "promptMode": "fixed",
-    "prompt": "Refactor this module to reduce duplication.",
-    "model": "gpt-5.2-codex",
-    "reasoningEffort": "medium",
-    "sandbox": "workspace-write",
-    "outputPorts": 1,
-    "skipGitRepoCheck": false
   }
 }
 ```
@@ -816,3 +741,42 @@ Use these fields to standardize how data is read consumed by models
 - UI node creation handlers: `src/webview/src/components/NodePalette.tsx`
 - Runtime node registration: `src/webview/src/components/WorkflowEditor.tsx`
 - Validation rules: `src/extension/utils/validate-workflow.ts`
+
+# MCP Tools (`mcp`)
+
+Description:
+- Calls an MCP server tool with typed parameters.
+- Supports manual parameter config and AI-assisted config modes.
+
+Invocation:
+- Click `MCP` in Node Palette to open MCP Node dialog.
+- Pick server, tool, and mode (`manualParameterConfig`, `aiParameterConfig`, or `aiToolSelection`).
+- For generated workflows, prefer `manualParameterConfig`.
+
+Example:
+
+```json
+{
+  "id": "mcp-1730000000007",
+  "type": "mcp",
+  "name": "Open URL",
+  "position": { "x": 300, "y": 250 },
+  "data": {
+    "mode": "manualParameterConfig",
+    "serverId": "playwright",
+    "toolName": "playwright_navigate",
+    "toolDescription": "Navigate browser to URL",
+    "parameters": [
+      {
+        "name": "url",
+        "type": "string",
+        "description": "Target URL",
+        "required": true
+      }
+    ],
+    "parameterValues": { "url": "https://example.com" },
+    "validationStatus": "valid",
+    "outputPorts": 1
+  }
+}
+```

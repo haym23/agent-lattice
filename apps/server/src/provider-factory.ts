@@ -1,4 +1,11 @@
-import { type LlmProvider, MockLlmProvider, OpenAiProvider } from "@lattice/llm"
+import {
+  type LlmProvider,
+  MockLlmProvider,
+  OpenAiProvider,
+  createLogger,
+} from "@lattice/llm"
+
+const logger = createLogger("server:provider-factory")
 
 export type LlmProviderFactory = () => LlmProvider
 
@@ -34,6 +41,7 @@ function readApiKeyFromEnv(): string | undefined {
 export function resolveProviderSelection(): ProviderSelection {
   const rawValue = process.env.LATTICE_LLM_PROVIDER?.trim().toLowerCase()
   if (!rawValue) {
+    logger.info("provider.selection.default", { provider: "openai" })
     return {
       provider: "openai",
       source: "default",
@@ -41,6 +49,7 @@ export function resolveProviderSelection(): ProviderSelection {
   }
 
   if (rawValue === "openai" || rawValue === "mock") {
+    logger.info("provider.selection.env", { provider: rawValue })
     return {
       provider: rawValue,
       source: "env",
@@ -56,13 +65,16 @@ export function createProviderFromEnv(): LlmProvider {
   const selection = resolveProviderSelection()
 
   if (selection.provider === "mock") {
+    logger.warn("provider.selection.mock")
     return new MockLlmProvider()
   }
 
   const apiKey = readApiKeyFromEnv()
   if (!apiKey) {
+    logger.error("provider.api_key.missing")
     throw new MissingProviderCredentialError(selection.provider)
   }
 
+  logger.info("provider.selection.openai")
   return new OpenAiProvider({ apiKey })
 }

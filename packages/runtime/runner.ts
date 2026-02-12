@@ -636,6 +636,11 @@ export class Runner {
         stageId: node.id,
         modelUsed: response.modelUsed,
         usage: response.usage,
+        response: {
+          value: response.content,
+          redactionLevel: "none",
+          isRedacted: false,
+        },
       })
 
       if (node.outputs?.result) {

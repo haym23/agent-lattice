@@ -16,7 +16,7 @@ describe("RepairEngine", () => {
       id: "n1",
       op: "LLM_WRITE",
       model_class: "SMALL_EXEC",
-      prompt_template: "llm-write-v1",
+      prompt_template: "prompt",
       output_schema: { type: "object" },
       retry_policy: { strategy: "PATCH_JSON_FROM_ERROR", max_attempts: 2 },
     }
@@ -43,7 +43,7 @@ describe("RepairEngine", () => {
       id: "n1",
       op: "LLM_WRITE",
       model_class: "SMALL_EXEC",
-      prompt_template: "llm-write-v1",
+      prompt_template: "prompt",
       output_schema: { type: "object" },
       retry_policy: { strategy: "PATCH_JSON_FROM_ERROR", max_attempts: 3 },
     }

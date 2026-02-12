@@ -38,7 +38,7 @@ describe("Runner", () => {
           id: "llm",
           op: "LLM_WRITE",
           model_class: "SMALL_EXEC",
-          prompt_template: "llm-write-v1",
+          prompt_template: "prompt",
           output_schema: { type: "object" },
           validators: [{ type: "json_schema", schema: { type: "object" } }],
           outputs: { result: "$vars.llm.result" },
@@ -205,7 +205,7 @@ describe("Runner", () => {
           id: "llm",
           op: "LLM_WRITE",
           model_class: "SMALL_EXEC",
-          prompt_template: "llm-write-v1",
+          prompt_template: "prompt",
           output_schema: { type: "object" },
           validators: [
             {
@@ -354,7 +354,7 @@ describe("Runner", () => {
           id: "llm",
           op: "LLM_WRITE",
           model_class: "SMALL_EXEC",
-          prompt_template: "llm-write-v1",
+          prompt_template: "prompt",
           output_schema: { type: "object" },
           validators: [{ type: "json_schema", schema: { type: "object" } }],
           outputs: { result: "$vars.llm.result" },

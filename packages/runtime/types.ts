@@ -124,6 +124,7 @@ export interface LlmStepCompletedPayload {
     promptTokens: number
     completionTokens: number
   }
+  response?: RedactedContent
 }
 
 export interface LlmStepFailedPayload {

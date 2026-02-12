@@ -1,11 +1,15 @@
-import { llmClassifyV1Template } from "./templates/llm-classify-v1"
-import { llmWriteV1Template } from "./templates/llm-write-v1"
-import { nodeAskUserQuestionV1Template } from "./templates/ask-user-question"
-import { nodeIfElseV1Template } from "./templates/if-else"
-import { nodePromptV1Template } from "./templates/prompt"
-import { nodeSubAgentV1Template } from "./templates/sub-agent"
-import { nodeSwitchV1Template } from "./templates/switch"
+import { askUserQuestionTemplate } from "./templates/ask-user-question"
+import { conditionalTemplate } from "./templates/conditional"
+import { disruptiveTemplate } from "./templates/disruptive"
+import { exceptionTemplate } from "./templates/exception"
+import { loopTemplate } from "./templates/loop"
+import { nondeterministicTemplate } from "./templates/nondeterministic"
+import { promptTemplate } from "./templates/prompt"
+import { recursionTemplate } from "./templates/recursion"
 import { repairV1Template } from "./templates/repair-v1"
+import { sequentialTemplate } from "./templates/sequential"
+import { subAgentTemplate } from "./templates/sub-agent"
+import { switchTemplate } from "./templates/switch"
 import { PromptTemplateRegistry } from "./types"
 
 /**
@@ -13,13 +17,17 @@ import { PromptTemplateRegistry } from "./types"
  */
 export function createDefaultPromptRegistry(): PromptTemplateRegistry {
   const registry = new PromptTemplateRegistry()
-  registry.register(nodePromptV1Template)
-  registry.register(nodeSubAgentV1Template)
-  registry.register(nodeIfElseV1Template)
-  registry.register(nodeSwitchV1Template)
-  registry.register(nodeAskUserQuestionV1Template)
-  registry.register(llmWriteV1Template)
-  registry.register(llmClassifyV1Template)
+  registry.register(sequentialTemplate)
+  registry.register(conditionalTemplate)
+  registry.register(switchTemplate)
+  registry.register(loopTemplate)
+  registry.register(recursionTemplate)
+  registry.register(nondeterministicTemplate)
+  registry.register(disruptiveTemplate)
+  registry.register(exceptionTemplate)
+  registry.register(promptTemplate)
+  registry.register(subAgentTemplate)
+  registry.register(askUserQuestionTemplate)
   registry.register(repairV1Template)
   return registry
 }

@@ -9,7 +9,7 @@ describe("Validator", () => {
       id: "n1",
       op: "LLM_WRITE",
       model_class: "SMALL_EXEC",
-      prompt_template: "llm-write-v1",
+      prompt_template: "prompt",
       output_schema: {
         type: "object",
         properties: { id: { type: "string" } },
@@ -36,7 +36,7 @@ describe("Validator", () => {
       id: "n1",
       op: "LLM_WRITE",
       model_class: "SMALL_EXEC",
-      prompt_template: "llm-write-v1",
+      prompt_template: "prompt",
       output_schema: { type: "object" },
       validators: [
         {
@@ -60,7 +60,7 @@ describe("Validator", () => {
       id: "n1",
       op: "LLM_WRITE",
       model_class: "SMALL_EXEC",
-      prompt_template: "llm-write-v1",
+      prompt_template: "prompt",
       output_schema: { type: "object" },
       validators: [{ type: "invariant", expr: "$out.id in $in.allowed" }],
     }

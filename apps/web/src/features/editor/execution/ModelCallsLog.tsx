@@ -16,6 +16,17 @@ export function ModelCallsLog({ events }: ModelCallsLogProps): JSX.Element {
     )
   })
 
+  const formatValue = (value: unknown): string => {
+    if (typeof value === "string") {
+      return value
+    }
+    try {
+      return JSON.stringify(value, null, 2)
+    } catch {
+      return String(value)
+    }
+  }
+
   return (
     <section>
       <h4 style={{ margin: "0 0 8px" }}>Model and Tool Timeline</h4>
@@ -38,6 +49,27 @@ export function ModelCallsLog({ events }: ModelCallsLogProps): JSX.Element {
               <div>
                 Model:{" "}
                 {"modelUsed" in event.payload ? event.payload.modelUsed : ""}
+              </div>
+            ) : null}
+            {event.type === "llm.step.completed" &&
+            "response" in event.payload &&
+            event.payload.response ? (
+              <div>
+                <div>Response:</div>
+                <pre
+                  style={{
+                    margin: "4px 0 0",
+                    padding: "6px 8px",
+                    background: "#f8fafc",
+                    borderRadius: 6,
+                    whiteSpace: "pre-wrap",
+                    fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                  }}
+                >
+                  {event.payload.response.isRedacted
+                    ? "[REDACTED]"
+                    : formatValue(event.payload.response.value)}
+                </pre>
               </div>
             ) : null}
             {event.type === "tool.called" ? (

@@ -1,6 +1,8 @@
 import type { ExecNode } from "@lattice/ir"
-import type { LlmProvider } from "@lattice/llm"
+import { type LlmProvider, createLogger } from "@lattice/llm"
 import type { ValidationError } from "./validator"
+
+const logger = createLogger("runtime:repair")
 
 export interface RepairResult {
   repaired: boolean
@@ -24,6 +26,7 @@ export class RepairEngine {
         : 1
     const modelClass = "model_class" in node ? node.model_class : "SMALL_EXEC"
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      logger.debug("repair.attempt", { attempt, maxAttempts, modelClass })
       const repairPacket = {
         error: errors.map((e) => e.message).join("; "),
         previous_output: previousOutput,
@@ -45,12 +48,14 @@ export class RepairEngine {
         responseFormat: { type: "object" },
       })
       try {
+        logger.info("repair.succeeded", { attempt })
         return {
           repaired: true,
           output: response.parsed ?? JSON.parse(response.content),
           attempts: attempt,
         }
       } catch {
+        logger.warn("repair.parse_failed", { attempt })
         if (attempt === maxAttempts) {
           break
         }

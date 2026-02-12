@@ -1,7 +1,7 @@
 import type { PromptTemplate } from "../types"
 
-export const nodeAskUserQuestionV1Template: PromptTemplate = {
-  id: "node-ask-user-question-v1",
+export const askUserQuestionTemplate: PromptTemplate = {
+  id: "ask-user-question",
   version: "1",
   systemPrompt:
     "You design user-facing clarification questions for workflow branching. Produce neutral, concise options and return strict JSON only.",

@@ -2,6 +2,7 @@ import {
   createEventFactory,
   type ExecutionEvent,
   type ProviderFailure,
+  type RedactedContent,
   redactContent,
 } from "@lattice/runtime"
 
@@ -27,6 +28,7 @@ export type AiSdkEvent =
         promptTokens?: number
         completionTokens?: number
       }
+      response?: unknown
     }
   | {
       type: "step-fail"
@@ -79,6 +81,14 @@ function toCanonicalProviderFailure(
   }
 }
 
+function toPlainContent(value: unknown): RedactedContent {
+  return {
+    value,
+    redactionLevel: "none",
+    isRedacted: false,
+  }
+}
+
 export function createAiSdkEventMapper(runId: string) {
   const { emit } = createEventFactory(runId)
 
@@ -122,6 +132,10 @@ export function createAiSdkEventMapper(runId: string) {
           promptTokens: event.usage?.promptTokens ?? 0,
           completionTokens: event.usage?.completionTokens ?? 0,
         },
+        response:
+          event.response === undefined
+            ? undefined
+            : toPlainContent(event.response),
       })
     }
 

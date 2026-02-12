@@ -1,7 +1,7 @@
 import type { PromptTemplate } from "../types"
 
-export const nodePromptV1Template: PromptTemplate = {
-  id: "node-prompt-v1",
+export const promptTemplate: PromptTemplate = {
+  id: "prompt",
   version: "1",
   systemPrompt:
     "You execute a workflow Prompt node. Follow the instruction exactly, ground your response in the provided input, and return only valid JSON that matches the required schema.",

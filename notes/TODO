@@ -1,7 +1,12 @@
-# NEED
+# Bugs
+[ ] Fix UI state when SSE connection broken
+[ ] Fix node editors
+  [ ] Apply node changes works but has no indication
+
+# Need
 
 - [ ] Build out compiler
-  - [ ] Add block -> prompt translators for primitive node types  
+  - [x] Add block -> prompt translators for primitive node types  
 - [ ] Update compiler to use Anthropic best practices
 
 - [ ] Update node editors for each node type
@@ -14,6 +19,7 @@
 - [ ] Each node should follow Principle of Least Privilege 
   - [ ] See ClawdBot/MoltBot issues
   - [ ] Protect against prompt injection
+  - [ ] Require explicit permissions until granted
 
 - [ ] Export to Claude, Codex, OpenCode, or Github Copilot (prompt)
 - [ ] Launch with Claude, OpenAI

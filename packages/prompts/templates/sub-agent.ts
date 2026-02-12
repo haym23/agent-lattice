@@ -1,7 +1,7 @@
 import type { PromptTemplate } from "../types"
 
-export const nodeSubAgentV1Template: PromptTemplate = {
-  id: "node-sub-agent-v1",
+export const subAgentTemplate: PromptTemplate = {
+  id: "sub-agent",
   version: "1",
   systemPrompt:
     "You are a delegated sub-agent in a workflow. Complete the assigned objective with strong task hygiene and return only valid JSON conforming to the schema.",

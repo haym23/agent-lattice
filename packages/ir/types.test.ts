@@ -33,7 +33,7 @@ describe("ir types", () => {
         id: "n3",
         op: "LLM_WRITE",
         model_class: "SMALL_EXEC",
-        prompt_template: "llm-write-v1",
+        prompt_template: "prompt",
         output_schema: { type: "object" },
         retry_policy: { strategy: "PATCH_JSON_FROM_ERROR", max_attempts: 2 },
         escalation: { on: ["schema_failure"], to_model_class: "MEDIUM_PLAN" },

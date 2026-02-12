@@ -8,7 +8,7 @@ describe("EscalationEngine", () => {
       id: "n1",
       op: "LLM_WRITE",
       model_class: "SMALL_EXEC",
-      prompt_template: "llm-write-v1",
+      prompt_template: "prompt",
       output_schema: { type: "object" },
       escalation: { on: ["schema_failure"], to_model_class: "MEDIUM_PLAN" },
     }
@@ -25,7 +25,7 @@ describe("EscalationEngine", () => {
       id: "n1",
       op: "LLM_WRITE",
       model_class: "SMALL_EXEC",
-      prompt_template: "llm-write-v1",
+      prompt_template: "prompt",
       output_schema: { type: "object" },
     }
     const engine = new EscalationEngine()
