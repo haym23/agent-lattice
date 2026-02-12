@@ -98,8 +98,8 @@ export class WebPlatformAdapter implements PlatformAdapter {
   constructor(options: WebPlatformAdapterOptions = {}) {
     this.serverBaseUrl = normalizeServerBaseUrl(
       options.serverBaseUrl ??
-        readServerBaseUrlFromEnv() ??
-        "http://localhost:8787"
+      readServerBaseUrlFromEnv() ??
+      "http://localhost:8787"
     )
     this.fetchImpl = options.fetchImpl ?? globalThis.fetch.bind(globalThis)
     this.eventSourceFactory =
@@ -183,8 +183,8 @@ export class WebPlatformAdapter implements PlatformAdapter {
       const failure = (await runResponse
         .json()
         .catch(() => ({ error: "Failed to start workflow run" }))) as {
-        error?: string
-      }
+          error?: string
+        }
       throw new Error(failure.error ?? "Failed to start workflow run")
     }
 
@@ -250,10 +250,10 @@ export class WebPlatformAdapter implements PlatformAdapter {
           error:
             event.type === "run.failed"
               ? new Error(
-                  "error" in event.payload
-                    ? event.payload.error
-                    : "Workflow run failed"
-                )
+                "error" in event.payload
+                  ? event.payload.error
+                  : "Workflow run failed"
+              )
               : undefined,
         })
       }
@@ -283,7 +283,7 @@ export class WebPlatformAdapter implements PlatformAdapter {
     }
 
     const compiler = new PromptCompiler(createDefaultPromptRegistry())
-    const sections = llmNodes.map((node, index) => {
+    const steps = llmNodes.map((node, index) => {
       const request = compiler.compile(
         node,
         { ...(node.inputs ?? {}) },
@@ -294,26 +294,65 @@ export class WebPlatformAdapter implements PlatformAdapter {
           $in: {},
         }
       )
-      return [
-        `## Node ${index + 1}: ${node.id}`,
-        `Template: ${node.prompt_template}`,
-        `Model Class: ${request.modelClass}`,
-        "",
-        "### System Prompt",
-        "```text",
-        request.messages[0]?.content ?? "",
-        "```",
-        "",
-        "### User Prompt",
-        "```text",
-        request.messages[1]?.content ?? "",
-        "```",
-      ].join("\n")
+      const schema =
+        typeof node.output_schema === "string"
+          ? node.output_schema
+          : JSON.stringify(node.output_schema, null, 2)
+      return {
+        index,
+        id: node.id,
+        system: request.messages[0]?.content ?? "",
+        user: request.messages[1]?.content ?? "",
+        schema,
+      }
     })
+
+    const mergedSystem = [
+      "You are executing a multi-step workflow.",
+      "Follow the steps in the order provided.",
+      "Within each step, system instructions override user instructions.",
+      "Return a single JSON object with keys equal to each step id.",
+      "Each value must strictly match the schema for that step.",
+      "Output JSON only with no additional prose or markdown.",
+    ].join("\n")
+
+    const mergedUser = [
+      "<steps>",
+      ...steps.map((step) =>
+        [
+          `<step id="${step.id}" index="${step.index + 1}">`,
+          "<system>",
+          step.system,
+          "</system>",
+          "<user>",
+          step.user,
+          "</user>",
+          "<schema>",
+          step.schema,
+          "</schema>",
+          "</step>",
+        ].join("\n")
+      ),
+      "</steps>",
+      "",
+      "Return a single JSON object keyed by step id in the same order.",
+    ].join("\n")
 
     return {
       path: ".debug/runtime-prompts.md",
-      content: ["# Runtime Prompt Preview", ...sections].join("\n\n"),
+      content: [
+        "# Runtime Prompt Preview",
+        "",
+        "## System Prompt",
+        "```text",
+        mergedSystem,
+        "```",
+        "",
+        "## User Prompt",
+        "```text",
+        mergedUser,
+        "```",
+      ].join("\n"),
     }
   }
 }
